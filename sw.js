@@ -1,5 +1,5 @@
 // Service worker : permet l'installation et l'affichage hors connexion du dernier contenu consulté.
-const VERSION = 'sophro-v1';
+const VERSION = 'sophro-v2';
 const STATIC = ['/', '/assets/style.css', '/assets/app.js', '/assets/icon.svg', '/assets/fonts/Lora.ttf', '/assets/fonts/Lora-Italic.ttf', '/manifest.webmanifest'];
 
 self.addEventListener('install', (e) => {
@@ -43,4 +43,32 @@ self.addEventListener('fetch', (e) => {
       })
     );
   }
+});
+
+// Notification du matin : le serveur envoie un simple signal, on va chercher le contenu du jour.
+self.addEventListener('push', (e) => {
+  e.waitUntil((async () => {
+    let d = { title: 'Votre pause du jour est arrivée', body: 'Prenez un instant pour vous.', url: '/' };
+    try { d = await (await fetch('/api/today.php', { cache: 'no-store' })).json(); } catch (err) { /* message par défaut */ }
+    if (self.navigator.setAppBadge) { try { await self.navigator.setAppBadge(1); } catch (err) {} }
+    await self.registration.showNotification(d.title, {
+      body: d.body,
+      icon: '/assets/icon-192.png',
+      badge: '/assets/badge-96.png',
+      image: d.image || undefined,
+      tag: 'sophro-du-jour',
+      data: { url: d.url || '/' },
+    });
+  })());
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || '/';
+  e.waitUntil((async () => {
+    if (self.navigator.clearAppBadge) { try { await self.navigator.clearAppBadge(); } catch (err) {} }
+    const wins = await clients.matchAll({ type: 'window', includeUncontrolled: true });
+    for (const w of wins) { if ('focus' in w) { w.navigate(url).catch(() => {}); return w.focus(); } }
+    return clients.openWindow(url);
+  })());
 });

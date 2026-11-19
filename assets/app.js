@@ -26,6 +26,61 @@
   const hint = document.getElementById('ios-hint');
   if (hint && isIOS && !standalone) hint.hidden = false;
 
+  // --- Pastille sur l'icône : on l'enlève dès que l'app est ouverte ---
+  const clearBadge = () => {
+    if ('clearAppBadge' in navigator) navigator.clearAppBadge().catch(() => {});
+    navigator.serviceWorker?.ready.then((reg) => reg.getNotifications?.().then((ns) => ns.forEach((n) => n.close()))).catch(() => {});
+  };
+  clearBadge();
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) clearBadge(); });
+
+  // --- Notification quotidienne ---
+  const notify = document.getElementById('notify');
+  const vapid = document.querySelector('meta[name=vapid-key]')?.content;
+  const show = (id) => ['notify-on', 'notify-state', 'notify-ios', 'notify-denied'].forEach((x) => {
+    const el = document.getElementById(x); if (el) el.hidden = x !== id;
+  });
+  const keyBytes = (b64) => {
+    const s = atob(b64.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((b64.length + 3) % 4));
+    return Uint8Array.from(s, (ch) => ch.charCodeAt(0));
+  };
+  const api = (body) => fetch('/api/subscribe.php', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+
+  async function initNotify() {
+    if (!notify || !vapid) return;
+    const pushOk = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    if (!pushOk) {
+      if (isIOS && !standalone) { notify.hidden = false; show('notify-ios'); }
+      return;
+    }
+    notify.hidden = false;
+    if (Notification.permission === 'denied') return show('notify-denied');
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) { api({ endpoint: sub.endpoint }); show('notify-state'); } else show('notify-on');
+  }
+
+  document.getElementById('notify-on')?.addEventListener('click', async () => {
+    try {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') return show(perm === 'denied' ? 'notify-denied' : 'notify-on');
+      const reg = await navigator.serviceWorker.ready;
+      const sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(vapid) });
+      const res = await api({ endpoint: sub.endpoint });
+      if (!res.ok) throw new Error('serveur');
+      show('notify-state');
+    } catch (e) {
+      alert("Impossible d'activer les notifications sur cet appareil.");
+    }
+  });
+  document.getElementById('notify-off')?.addEventListener('click', async () => {
+    const reg = await navigator.serviceWorker.ready;
+    const sub = await reg.pushManager.getSubscription();
+    if (sub) { await api({ action: 'unsubscribe', endpoint: sub.endpoint }); await sub.unsubscribe(); }
+    show('notify-on');
+  });
+  initNotify().catch(() => {});
+
   // --- Partage ---
   // On prépare l'image à l'avance : Safari exige que navigator.share() soit appelé tout de suite après le clic.
   const files = new Map();

@@ -1,7 +1,10 @@
 <?php
 declare(strict_types=1);
 
-/* Image de partage (1200×630) générée pour les contenus sans image : le texte sur fond doux. */
+/*
+ * Image de partage générée : le texte sur fond doux (1200×630, aperçu des liens partagés).
+ * Avec &format=jpg : image JPG pour Facebook/Instagram (la photo du contenu, ou une carte carrée 1080×1080).
+ */
 
 require __DIR__ . '/lib/bootstrap.php';
 
@@ -11,18 +14,44 @@ if (!$c || !is_public($c) || !function_exists('imagettftext')) {
     exit;
 }
 
+$jpg = ($_GET['format'] ?? '') === 'jpg';
+$ext = $jpg ? 'jpg' : 'png';
 $cacheDir = ROOT . '/uploads/og';
-$cacheFile = $cacheDir . '/' . (int) $c['id'] . '-' . md5($c['updated_at'] . $c['title'] . $c['body']) . '.png';
+$cacheFile = $cacheDir . '/' . (int) $c['id'] . '-' . md5($c['updated_at'] . $c['title'] . $c['body'] . $c['image']) . '.' . $ext;
 
 if (!is_file($cacheFile)) {
     if (!is_dir($cacheDir)) {
         mkdir($cacheDir, 0775, true);
     }
-    foreach (glob($cacheDir . '/' . (int) $c['id'] . '-*.png') ?: [] as $old) {
+    foreach (glob($cacheDir . '/' . (int) $c['id'] . '-*.' . $ext) ?: [] as $old) {
         @unlink($old);
     }
-    $W = 1200;
-    $H = 630;
+}
+
+if (!is_file($cacheFile) && $jpg && $c['image']) {
+    // Photo du contenu en JPG, recadrée entre 4:5 et 1.91:1 (formats acceptés par Instagram)
+    $src = @imagecreatefromstring((string) file_get_contents(ROOT . '/uploads/' . $c['image']));
+    if ($src) {
+        $w = imagesx($src);
+        $hh = imagesy($src);
+        $cw = $w;
+        $ch = $hh;
+        if ($w / $hh < 0.8) {
+            $ch = (int) round($w / 0.8);
+        } elseif ($w / $hh > 1.91) {
+            $cw = (int) round($hh * 1.91);
+        }
+        $scale = min(1, 1440 / $cw);
+        $dst = imagecreatetruecolor((int) round($cw * $scale), (int) round($ch * $scale));
+        imagefill($dst, 0, 0, imagecolorallocate($dst, 255, 255, 255));
+        imagecopyresampled($dst, $src, 0, 0, (int) (($w - $cw) / 2), (int) (($hh - $ch) / 2), imagesx($dst), imagesy($dst), $cw, $ch);
+        imagejpeg($dst, $cacheFile, 88);
+    }
+}
+
+if (!is_file($cacheFile)) {
+    $W = $jpg ? 1080 : 1200;
+    $H = $jpg ? 1080 : 630;
     $img = imagecreatetruecolor($W, $H);
     // dégradé vert sauge → sable
     [$r1, $g1, $b1] = [0xE8, 0xEF, 0xE9];
@@ -44,8 +73,8 @@ if (!is_file($cacheFile)) {
     $title = trim((string) $c['title']);
 
     // taille de police adaptée à la longueur
-    $size = mb_strlen($text) < 80 ? 46 : (mb_strlen($text) < 150 ? 38 : 31);
-    $maxW = $W - 200;
+    $size = (mb_strlen($text) < 80 ? 46 : (mb_strlen($text) < 150 ? 38 : 31)) + ($jpg ? 4 : 0);
+    $maxW = $W - ($jpg ? 160 : 200);
     $lines = [];
     $line = '';
     foreach (preg_split('/\s+/u', $text) as $word) {
@@ -75,9 +104,9 @@ if (!is_file($cacheFile)) {
     $brand = (string) cfg('site_name') . '  ·  ' . parse_url(base_url(), PHP_URL_HOST);
     $box = imagettfbbox(20, 0, $font, $brand);
     imagettftext($img, 20, 0, (int) (($W - ($box[2] - $box[0])) / 2), $H - 40, $green, $font, $brand);
-    imagepng($img, $cacheFile, 6);
+    $jpg ? imagejpeg($img, $cacheFile, 90) : imagepng($img, $cacheFile, 6);
 }
 
-header('Content-Type: image/png');
+header('Content-Type: image/' . ($jpg ? 'jpeg' : 'png'));
 header('Cache-Control: public, max-age=86400');
 readfile($cacheFile);

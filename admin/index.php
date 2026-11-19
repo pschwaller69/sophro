@@ -56,6 +56,10 @@ if (!is_admin()) {
     exit;
 }
 
+if (setting('site_url') !== base_url()) {
+    set_setting('site_url', base_url()); // utilisé par la tâche cron pour construire les liens
+}
+
 $today = date('Y-m-d');
 $todayContent = content_for_day($today);
 
@@ -93,7 +97,7 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
 ?>
 <header class="site-header">
   <a href="/admin/" class="brand"><img src="/assets/icon.svg" alt="" width="36" height="36"><span>Administration</span></a>
-  <nav><a href="/" target="_blank">Voir le site</a> · <a href="/admin/password.php">Mot de passe</a> · <a href="/admin/logout.php">Déconnexion</a></nav>
+  <nav><a href="/" target="_blank">Voir le site</a> · <a href="/admin/social.php">Réseaux &amp; notifications</a> · <a href="/admin/password.php">Mot de passe</a> · <a href="/admin/logout.php">Déconnexion</a></nav>
 </header>
 
 <main class="wrap wide">

@@ -155,3 +155,5 @@ img { max-width: 100%; }
 .site-header .btn { padding: 8px 14px; font-size: .88rem; white-space: nowrap; }
 .brand span { white-space: nowrap; }
 .up-day { white-space: nowrap; }
+.notify { text-align: center; margin: 26px 0 0; }
+.linkish { border: 0; background: none; color: var(--green-dark); text-decoration: underline; font: inherit; cursor: pointer; padding: 0; }

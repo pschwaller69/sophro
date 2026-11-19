@@ -11,6 +11,7 @@ $GLOBALS['CONFIG'] = array_merge([
     'site_name'           => 'Sophro du jour',
     'site_tagline'        => 'Une pause sophrologie, chaque jour',
     'site_url'            => '',      // ex. https://sophro.schwaller.fr (détecté automatiquement si vide)
+    'notify_label'        => '7 h 30',   // heure affichée sur le bouton de notification (l'heure réelle est celle de la tâche cron)
     'admin_password_hash' => '',      // facultatif : sinon le mot de passe est créé depuis /admin/ et stocké en base
 ], is_file($__cfgFile) ? (array) require $__cfgFile : []);
 
@@ -25,9 +26,13 @@ function base_url(): string
     if ($u !== '') {
         return rtrim($u, '/');
     }
+    if (PHP_SAPI === 'cli' || empty($_SERVER['HTTP_HOST'])) {
+        // tâche cron : on reprend l'adresse vue lors de la dernière visite de l'admin
+        return rtrim(setting('site_url') ?: 'https://sophro.schwaller.fr', '/');
+    }
     $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
         || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-    return ($https ? 'https' : 'http') . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
+    return ($https ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'];
 }
 
 function h(?string $s): string
@@ -91,6 +96,12 @@ function migrate(PDO $pdo): void
             content_id INTEGER NOT NULL REFERENCES contents(id) ON DELETE CASCADE
         );
         CREATE INDEX IF NOT EXISTS daily_content ON daily(content_id);
+        CREATE TABLE IF NOT EXISTS push_subscriptions (
+            id         INTEGER PRIMARY KEY AUTOINCREMENT,
+            endpoint   TEXT NOT NULL UNIQUE,
+            created_at TEXT NOT NULL DEFAULT (datetime('now')),
+            last_ok    TEXT
+        );
         CREATE TABLE IF NOT EXISTS settings (
             key   TEXT PRIMARY KEY,
             value TEXT NOT NULL

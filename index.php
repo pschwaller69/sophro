@@ -4,6 +4,7 @@ declare(strict_types=1);
 require __DIR__ . '/lib/bootstrap.php';
 require __DIR__ . '/lib/daily.php';
 require __DIR__ . '/lib/layout.php';
+require __DIR__ . '/lib/push.php';
 
 $today = date('Y-m-d');
 $c = null;
@@ -38,6 +39,11 @@ if ($c) {
     }
 }
 
+try {
+    $meta['vapid'] = vapid_public_key();
+} catch (Throwable $e) {
+    // pas de notifications si OpenSSL ne le permet pas
+}
 page_head($meta, 'public');
 ?>
 <header class="site-header">
@@ -62,6 +68,13 @@ page_head($meta, 'public');
     </div></article>
   <?php endif ?>
 
+  <div class="notify" id="notify" hidden>
+    <button type="button" class="btn btn-ghost" id="notify-on">🔔 Me prévenir chaque jour à <?= h(cfg('notify_label')) ?></button>
+    <p class="muted small" id="notify-state" hidden>🔔 Vous recevez la notification chaque jour à <?= h(cfg('notify_label')) ?>. <button type="button" class="linkish" id="notify-off">Ne plus recevoir</button></p>
+    <p class="muted small" id="notify-ios" hidden>Pour recevoir une notification chaque matin sur iPhone, ajoutez d'abord l'application à l'écran d'accueil, puis ouvrez-la depuis son icône.</p>
+    <p class="muted small" id="notify-denied" hidden>Les notifications sont bloquées pour ce site dans les réglages du téléphone.</p>
+  </div>
+
   <?php if ($recent): ?>
     <section class="recent">
       <h2>Les jours précédents</h2>
@@ -76,6 +89,7 @@ page_head($meta, 'public');
       </ul>
     </section>
   <?php endif ?>
+
 
   <p class="ios-hint" id="ios-hint" hidden>
     Pour installer l'application sur iPhone : touchez <strong>Partager</strong> puis <strong>Sur l'écran d'accueil</strong>.

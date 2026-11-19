@@ -30,6 +30,7 @@ function page_head(array $meta = [], string $bodyClass = ''): void
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#5f7f6e">
 <link rel="manifest" href="/manifest.webmanifest">
+<?php if (!empty($meta['vapid'])): ?><meta name="vapid-key" content="<?= h($meta['vapid']) ?>"><?php endif ?>
 <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
