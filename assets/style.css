@@ -181,3 +181,4 @@ body.public .recent a:hover { background: color-mix(in srgb, var(--card) 80%, tr
 @media (prefers-color-scheme: dark) {
   body.public[class*="season-"] { background-image: none; }
 }
+.app-version { text-align: center; color: var(--muted); font-size: .78rem; padding: 10px 16px 28px; }

@@ -49,8 +49,33 @@ function current_season(): string
     return in_array($preview, ['printemps', 'ete', 'automne', 'hiver'], true) ? $preview : season();
 }
 
+/** Version affichée en bas de l'admin : fichier VERSION + commit Git récupéré par o2switch. */
+function app_version(): string
+{
+    $v = trim((string) @file_get_contents(ROOT . '/VERSION')) ?: '?';
+    $head = trim((string) @file_get_contents(ROOT . '/.git/HEAD'));
+    $hash = '';
+    if (str_starts_with($head, 'ref: ')) {
+        $ref = substr($head, 5);
+        $hash = trim((string) @file_get_contents(ROOT . '/.git/' . $ref));
+        if ($hash === '' && is_file(ROOT . '/.git/packed-refs')) {
+            foreach (file(ROOT . '/.git/packed-refs') as $l) {
+                if (str_ends_with(trim($l), ' ' . $ref)) {
+                    $hash = strtok($l, ' ');
+                }
+            }
+        }
+    } elseif (preg_match('/^[0-9a-f]{40}$/', $head)) {
+        $hash = $head;
+    }
+    return 'Version ' . $v . ($hash ? ' · ' . substr($hash, 0, 7) : '');
+}
+
 function page_foot(): void
 {
+    if (str_contains((string) ($_SERVER['REQUEST_URI'] ?? ''), '/admin')) {
+        echo '<footer class="app-version">' . h(app_version()) . '</footer>';
+    }
     ?>
 <dialog id="share-dialog" class="share-dialog">
   <form method="dialog"><button class="close" aria-label="Fermer">×</button></form>
