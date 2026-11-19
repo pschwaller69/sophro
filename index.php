@@ -91,6 +91,20 @@ page_head($meta, 'public');
   <?php endif ?>
 
 
+  <p class="center share-app-link"><button type="button" class="linkish" id="share-app">Partager l'application avec un proche</button></p>
+
+  <dialog id="qr-dialog" class="share-dialog qr-dialog">
+    <form method="dialog"><button class="close" aria-label="Fermer">×</button></form>
+    <h2>Partager l'application</h2>
+    <p class="muted small">Faites scanner ce code avec l'appareil photo d'un téléphone :</p>
+    <img src="/assets/qr-sophro.svg" alt="QR code vers <?= h(parse_url(base_url(), PHP_URL_HOST)) ?>" width="240" height="240">
+    <p class="qr-url"><?= h(parse_url(base_url(), PHP_URL_HOST)) ?></p>
+    <div class="share-links">
+      <button type="button" data-share-app data-url="<?= h(base_url()) ?>/" data-title="<?= h(cfg('site_name')) ?>" data-text="<?= h(cfg('site_tagline')) ?> : une phrase, une image ou une mini-séance de sophrologie chaque jour.">Envoyer le lien</button>
+      <a href="/assets/qr-sophro.png" download="qr-sophro-du-jour.png" class="qr-download">Télécharger le QR code</a>
+    </div>
+  </dialog>
+
   <p class="ios-hint" id="ios-hint" hidden>
     Pour installer l'application sur iPhone : touchez <strong>Partager</strong> puis <strong>Sur l'écran d'accueil</strong>.
   </p>

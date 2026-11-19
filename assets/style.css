@@ -182,3 +182,10 @@ body.public .recent a:hover { background: color-mix(in srgb, var(--card) 80%, tr
   body.public[class*="season-"] { background-image: none; }
 }
 .app-version { text-align: center; color: var(--muted); font-size: .78rem; padding: 10px 16px 28px; }
+
+.share-app-link { margin-top: 18px; font-size: .92rem; }
+.qr-dialog { text-align: center; }
+.qr-dialog img { display: block; margin: 8px auto; border-radius: 14px; background: #fff; padding: 6px; }
+.qr-url { font-weight: 600; color: var(--violet-dark); margin: 4px 0 16px; }
+.qr-dialog .share-links { grid-template-columns: 1fr; }
+.qr-dialog .share-links button { grid-column: auto; }

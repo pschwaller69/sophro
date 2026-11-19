@@ -136,6 +136,19 @@
     openShareMenu(data);
   });
 
+  // --- Partager l'application (QR code) ---
+  const qr = document.getElementById('qr-dialog');
+  document.getElementById('share-app')?.addEventListener('click', () => qr?.showModal());
+  qr?.querySelector('[data-share-app]')?.addEventListener('click', async (ev) => {
+    const d = ev.currentTarget.dataset;
+    const data = { url: d.url, title: d.title, text: d.text };
+    if (navigator.share) {
+      try { await navigator.share(data); return; } catch (e) { if (e.name === 'AbortError') return; }
+    }
+    qr.close();
+    openShareMenu(data);
+  });
+
   // --- Admin : options selon le mode de publication ---
   const form = document.getElementById('edit-form');
   if (form) {
