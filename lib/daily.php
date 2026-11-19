@@ -126,6 +126,12 @@ function reset_today_if_needed(?array $c): void
     }
 }
 
+/** Oublie les tirages déjà faits pour les jours à venir (après un ajout, une modification ou un import). */
+function clear_future_days(): void
+{
+    db()->prepare('DELETE FROM daily WHERE day > ?')->execute([date('Y-m-d')]);
+}
+
 function recent_days(string $today, int $limit = 7): array
 {
     $st = db()->prepare('SELECT d.day, c.* FROM daily d JOIN contents c ON c.id = d.content_id

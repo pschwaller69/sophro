@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         delete_media($c['image']);
         delete_media($c['audio']);
         db()->prepare('DELETE FROM contents WHERE id = ?')->execute([$c['id']]);
+        clear_future_days();
         header('Location: /admin/?deleted=1');
         exit;
     }
@@ -86,6 +87,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $savedId = (int) db()->lastInsertId();
         }
         reset_today_if_needed(get_content($savedId));
+        clear_future_days();
         header('Location: /admin/?ok=1');
         exit;
     } catch (RuntimeException $e) {

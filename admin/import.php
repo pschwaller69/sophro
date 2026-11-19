@@ -145,6 +145,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         db()->commit();
         reset_today_if_needed(null);
+        clear_future_days();
         $report = compact('added', 'dupes', 'empty', 'errors');
     } catch (RuntimeException $e) {
         if (db()->inTransaction()) {

@@ -189,3 +189,8 @@ body.public .recent a:hover { background: color-mix(in srgb, var(--card) 80%, tr
 .qr-url { font-weight: 600; color: var(--violet-dark); margin: 4px 0 16px; }
 .qr-dialog .share-links { grid-template-columns: 1fr; }
 .qr-dialog .share-links button { grid-column: auto; }
+
+.up-content { flex: 1; min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; }
+.up-title { font-weight: 600; }
+.up-text { flex-basis: 100%; color: var(--muted); font-family: Lora, Georgia, serif; font-style: italic; font-size: .9rem; line-height: 1.45; }
+.upcoming li { align-items: flex-start; }

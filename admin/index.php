@@ -67,8 +67,10 @@ $todayContent = content_for_day($today);
 $upcoming = [];
 for ($i = 1; $i <= 14; $i++) {
     $d = date('Y-m-d', strtotime("$today +$i day"));
-    [$kind, $rows] = forced_for_day($d);
-    $upcoming[] = [$d, $kind, $rows];
+    [$kind] = forced_for_day($d);
+    // Le tirage est fait à l'avance et mémorisé : ce qui est affiché ici sera bien publié ce jour-là
+    // (il est refait si un contenu est ajouté, modifié ou supprimé entre-temps).
+    $upcoming[] = [$d, $kind, content_for_day($d)];
 }
 
 $filter = $_GET['f'] ?? 'all';
@@ -84,8 +86,8 @@ $order = match ($filter) {
     'yearly' => 'c.yearly_start ASC, c.yearly_end ASC, c.id',
     default  => 'c.id DESC',
 };
-$contents = db()->query("SELECT c.*, (SELECT COUNT(*) FROM daily WHERE content_id = c.id) AS shown,
-                                (SELECT MAX(day) FROM daily WHERE content_id = c.id) AS last_shown
+$contents = db()->query("SELECT c.*, (SELECT COUNT(*) FROM daily WHERE content_id = c.id AND day <= '$today') AS shown,
+                                (SELECT MAX(day) FROM daily WHERE content_id = c.id AND day <= '$today') AS last_shown
                          FROM contents c $where ORDER BY $order")->fetchAll();
 $counts = db()->query("SELECT COUNT(*) total, SUM(mode='auto') auto, SUM(mode='date') date, SUM(mode='yearly') yearly, SUM(active=0) draft FROM contents")->fetch();
 
@@ -128,14 +130,21 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
 
       <h2>Les 14 prochains jours</h2>
       <ul class="upcoming">
-        <?php foreach ($upcoming as [$d, $kind, $rows]): ?>
-          <li class="up-<?= $kind ?>">
+        <?php foreach ($upcoming as [$d, $kind, $uc]): ?>
+          <li class="up-<?= $uc ? h($uc['mode']) : 'auto' ?>">
             <span class="up-day"><?= h(date_fr($d)) ?></span>
-            <?php if ($kind === 'random'): ?>
-              <span class="muted">Tirage au hasard</span>
+            <?php if (!$uc): ?>
+              <span class="muted">Aucun contenu disponible</span>
             <?php else: ?>
-              <?= $kind === 'yearly' ? '<span class="muted">Saison :</span> ' : '' ?><a href="/admin/edit.php?id=<?= (int) $rows[0]['id'] ?>"><?= h(content_label($rows[0])) ?></a>
-              <?php if (count($rows) > 1): ?><span class="muted"><?= $kind === 'yearly' ? '(+' . (count($rows) - 1) . ' au choix)' : '(+' . (count($rows) - 1) . ' autre(s) le même jour)' ?></span><?php endif ?>
+              <div class="up-content">
+                <a href="/admin/edit.php?id=<?= (int) $uc['id'] ?>" class="up-title"><?= h(content_label($uc)) ?></a>
+                <?php if ($uc['mode'] !== 'auto'): ?><span class="badge mode-<?= h($uc['mode']) ?>"><?= $uc['mode'] === 'date' ? 'Date précise' : 'Chaque année' ?></span><?php endif ?>
+                <?php if ($uc['image']): ?><span class="badge">image</span><?php endif ?>
+                <?php if ($uc['audio']): ?><span class="badge">audio</span><?php endif ?>
+                <?php if (trim((string) $uc['body']) !== '' && trim((string) $uc['title']) !== ''): ?>
+                  <span class="up-text"><?= h(excerpt((string) $uc['body'], 160)) ?></span>
+                <?php endif ?>
+              </div>
             <?php endif ?>
           </li>
         <?php endforeach ?>
