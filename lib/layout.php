@@ -39,6 +39,7 @@ function page_head(array $meta = [], string $bodyClass = ''): void
 <script src="/assets/app.js?v=<?= $v ?>" defer></script>
 </head>
 <body class="<?= h($bodyClass) ?> season-<?= h(current_season()) ?>">
+<?php if (str_contains((string) ($_SERVER['REQUEST_URI'] ?? ''), '/admin')): ?><div class="app-version"><?= h(app_version()) ?></div><?php endif ?>
 <?php
 }
 
@@ -73,9 +74,6 @@ function app_version(): string
 
 function page_foot(): void
 {
-    if (str_contains((string) ($_SERVER['REQUEST_URI'] ?? ''), '/admin')) {
-        echo '<footer class="app-version">' . h(app_version()) . '</footer>';
-    }
     ?>
 <dialog id="share-dialog" class="share-dialog">
   <form method="dialog"><button class="close" aria-label="Fermer">×</button></form>
