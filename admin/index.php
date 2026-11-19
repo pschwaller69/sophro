@@ -88,7 +88,9 @@ function mode_label(array $c): string
 {
     return match ($c['mode']) {
         'date'   => 'Le ' . date_fr((string) $c['publish_date'], false, true),
-        'yearly' => 'Chaque année du ' . md_fr((string) $c['yearly_start']) . ' au ' . md_fr((string) $c['yearly_end']),
+        'yearly' => $c['yearly_start'] === $c['yearly_end']
+            ? 'Chaque année le ' . md_fr((string) $c['yearly_start'])
+            : 'Chaque année du ' . md_fr((string) $c['yearly_start']) . ' au ' . md_fr((string) $c['yearly_end']),
         default  => 'Au hasard',
     };
 }

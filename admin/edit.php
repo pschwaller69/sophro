@@ -48,7 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)) {
                 throw new RuntimeException('Choisissez la date de publication.');
             }
-            $new['publish_date'] = $d;
+            if (isset($_POST['repeat'])) {
+                // « Répéter chaque année » : devient un contenu annuel sur ce seul jour
+                $new['mode'] = 'yearly';
+                $new['yearly_start'] = $new['yearly_end'] = substr($d, 5);
+            } else {
+                $new['publish_date'] = $d;
+            }
         } elseif ($new['mode'] === 'yearly') {
             $new['yearly_start'] = $md('ys');
             $new['yearly_end'] = $md('ye');
@@ -155,11 +161,14 @@ page_head(['title' => $c['id'] ? 'Modifier' : 'Nouveau contenu', 'noindex' => tr
         <span><strong>À une date précise</strong><br><small>Montré ce jour-là, puis il rejoint les contenus tirés au hasard.</small></span></label>
       <div class="mode-opts" data-for="date">
         <input type="date" name="publish_date" value="<?= h($c['publish_date'] ?? date('Y-m-d', strtotime('+1 day'))) ?>">
+        <label class="inline"><input type="checkbox" name="repeat"> Répéter chaque année à cette date <span class="muted">(anniversaire, fête…)</span></label>
       </div>
       <label class="radio"><input type="radio" name="mode" value="yearly" <?= $c['mode'] === 'yearly' ? 'checked' : '' ?>>
-        <span><strong>Chaque année, pendant une période</strong><br><small>Noël, printemps, rentrée… Jamais tiré au hasard en dehors de cette période.</small></span></label>
+        <span><strong>Chaque année</strong><br><small>Un jour précis (anniversaire, 25 décembre…) ou une période (printemps, Noël…). Jamais tiré au hasard en dehors de ces dates.</small></span></label>
       <div class="mode-opts" data-for="yearly">
         <div class="presets">
+          <button type="button" data-preset="12-25,12-25">Jour de Noël</button>
+          <button type="button" data-preset="01-01,01-01">1er janvier</button>
           <button type="button" data-preset="12-20,12-31">Noël</button>
           <button type="button" data-preset="12-31,01-03">Nouvel an</button>
           <button type="button" data-preset="03-20,04-15">Printemps</button>
@@ -169,6 +178,7 @@ page_head(['title' => $c['id'] ? 'Modifier' : 'Nouveau contenu', 'noindex' => tr
           <button type="button" data-preset="12-21,01-10">Hiver</button>
         </div>
         <div class="md-range">Du <?= md_select('ys', $c['yearly_start']) ?> au <?= md_select('ye', $c['yearly_end']) ?></div>
+        <p class="muted small">Pour un seul jour par an, mettez la même date au début et à la fin.</p>
       </div>
     </fieldset>
 

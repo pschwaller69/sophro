@@ -18,7 +18,7 @@ Hébergée sur **https://sophro.schwaller.fr** (o2switch), déployée automatiqu
 ## Import de contenus (CSV)
 
 Admin → *Importer* : un fichier CSV avec les colonnes `titre ; texte ; quand ; date ; debut ; fin`
-(`quand` = `hasard`, `date` avec `date` en JJ/MM/AAAA, ou `saison` avec `debut`/`fin` en JJ/MM).
+(`quand` = `hasard` ; `date` avec `date` en JJ/MM/AAAA pour une seule fois ; `chaque année` avec `date` en JJ/MM pour un jour fixe répété tous les ans, ou `debut`/`fin` en JJ/MM pour une période).
 Les doublons (même titre et même texte) sont ignorés : réimporter le même fichier est sans risque.
 Pour une période annuelle, les contenus d'un seul jour (ex. 25/12) passent avant ceux d'une période plus longue.
 

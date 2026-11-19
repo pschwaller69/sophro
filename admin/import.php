@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cTitle = find_col($header, ['titre', 'title']);
         $cText = find_col($header, ['texte', 'phrase', 'contenu', 'body']);
         $cMode = find_col($header, ['quand', 'mode', 'type']);
-        $cDate = find_col($header, ['date']);
+        $cDate = find_col($header, ['date', 'jour']);
         $cStart = find_col($header, ['debut', 'début']);
         $cEnd = find_col($header, ['fin']);
         if ($cTitle === null && $cText === null) {
@@ -121,10 +121,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $errors[] = "Ligne $line : date invalide (« {$get($cDate)} », attendu JJ/MM/AAAA).";
                     continue;
                 }
-            } elseif (in_array($mode, ['saison', 'chaque année', 'annuel', 'yearly'], true)) {
+            } elseif (in_array($mode, ['saison', 'chaque année', 'chaque annee', 'tous les ans', 'annuel', 'yearly'], true)) {
                 $mode = 'yearly';
                 $start = parse_md($get($cStart));
                 $end = parse_md($get($cEnd));
+                // « chaque année » avec seulement une date (JJ/MM ou JJ/MM/AAAA) : ce jour-là chaque année
+                $one = parse_md($get($cDate)) ?? (($d = parse_date($get($cDate))) ? substr($d, 5) : null);
+                if ($one && !$start && !$end) {
+                    $start = $end = $one;
+                }
+                $start = $start ?? $end;
+                $end = $end ?? $start;
                 if (!$start || !$end) {
                     $errors[] = "Ligne $line : période invalide (attendu debut et fin au format JJ/MM).";
                     continue;
@@ -182,9 +189,9 @@ page_head(['title' => 'Importer', 'noindex' => true], 'admin');
     <p>Un tableau enregistré au format CSV (Excel, LibreOffice ou Google Sheets), avec ces colonnes sur la première ligne :</p>
     <ul>
       <li><strong>titre</strong> et <strong>texte</strong> : au moins l'un des deux ;</li>
-      <li><strong>quand</strong> : <em>hasard</em> (par défaut), <em>date</em> ou <em>saison</em> ;</li>
-      <li><strong>date</strong> : pour <em>date</em>, au format JJ/MM/AAAA ;</li>
-      <li><strong>debut</strong> et <strong>fin</strong> : pour <em>saison</em>, au format JJ/MM (ex. 18/12 et 26/12).</li>
+      <li><strong>quand</strong> : <em>hasard</em> (par défaut), <em>date</em> (une seule fois) ou <em>chaque année</em> (aussi accepté : <em>saison</em>) ;</li>
+      <li><strong>date</strong> : pour <em>date</em>, au format JJ/MM/AAAA ; pour <em>chaque année</em> sur un seul jour, JJ/MM (ex. 25/12) ;</li>
+      <li><strong>debut</strong> et <strong>fin</strong> : pour <em>chaque année</em> sur une période, au format JJ/MM (ex. 18/12 et 26/12).</li>
     </ul>
     <p class="muted">Un contenu qui existe déjà (même titre et même texte) n'est pas importé une deuxième fois : vous pouvez réimporter le même fichier sans risque.</p>
   </div></section>
