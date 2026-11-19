@@ -198,7 +198,7 @@ const MOIS  = ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juill
 function date_fr(string $ymd, bool $withDay = true, bool $withYear = false): string
 {
     $t = strtotime($ymd . ' 12:00:00');
-    $s = (int) date('j', $t) . ($withDay && date('j', $t) === '1' ? 'er' : '') . ' ' . MOIS[(int) date('n', $t)];
+    $s = (int) date('j', $t) . (date('j', $t) === '1' ? 'er' : '') . ' ' . MOIS[(int) date('n', $t)];
     if ($withYear) {
         $s .= ' ' . date('Y', $t);
     }

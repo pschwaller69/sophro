@@ -79,9 +79,14 @@ $where = match ($filter) {
     'draft'  => 'WHERE active = 0',
     default  => '',
 };
+$order = match ($filter) {
+    'date'   => 'c.publish_date ASC, c.id',
+    'yearly' => 'c.yearly_start ASC, c.yearly_end ASC, c.id',
+    default  => 'c.id DESC',
+};
 $contents = db()->query("SELECT c.*, (SELECT COUNT(*) FROM daily WHERE content_id = c.id) AS shown,
                                 (SELECT MAX(day) FROM daily WHERE content_id = c.id) AS last_shown
-                         FROM contents c $where ORDER BY c.id DESC")->fetchAll();
+                         FROM contents c $where ORDER BY $order")->fetchAll();
 $counts = db()->query("SELECT COUNT(*) total, SUM(mode='auto') auto, SUM(mode='date') date, SUM(mode='yearly') yearly, SUM(active=0) draft FROM contents")->fetch();
 
 function mode_label(array $c): string
