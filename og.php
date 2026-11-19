@@ -64,7 +64,8 @@ if (!is_file($cacheFile)) {
     $green = imagecolorallocate($img, 0x5F, 0x7F, 0x6E);
     $ink = imagecolorallocate($img, 0x2F, 0x3A, 0x34);
     $soft = imagecolorallocatealpha($img, 0x5F, 0x7F, 0x6E, 100);
-    imagefilledellipse($img, $W - 120, 110, 360, 360, $soft);
+    $lav = imagecolorallocatealpha($img, 0x8A, 0x78, 0xC0, 95);
+    imagefilledellipse($img, $W - 120, 110, 360, 360, $lav);
     imagefilledellipse($img, 90, $H - 40, 260, 260, $soft);
 
     $font = ROOT . '/assets/fonts/Lora.ttf';
