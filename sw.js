@@ -1,6 +1,6 @@
 // Service worker : permet l'installation et l'affichage hors connexion du dernier contenu consulté.
-const VERSION = 'sophro-v2';
-const STATIC = ['/', '/assets/style.css', '/assets/app.js', '/assets/icon.svg', '/assets/fonts/Lora.ttf', '/assets/fonts/Lora-Italic.ttf', '/manifest.webmanifest'];
+const VERSION = 'sophro-v3';
+const STATIC = ['/', '/assets/style.css', '/assets/app.js', '/assets/icon.svg', '/assets/fonts/Lora.ttf', '/assets/fonts/Lora-Italic.ttf', '/manifest.webmanifest', '/assets/seasons/printemps.svg', '/assets/seasons/ete.svg', '/assets/seasons/automne.svg', '/assets/seasons/hiver.svg'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(VERSION).then((c) => c.addAll(STATIC)).then(() => self.skipWaiting()));

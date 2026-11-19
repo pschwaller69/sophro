@@ -138,7 +138,7 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
     <section>
       <div class="list-head">
         <h2>Contenus (<?= (int) $counts['total'] ?>)</h2>
-        <a class="btn" href="/admin/edit.php">+ Nouveau contenu</a>
+        <span><a class="btn btn-ghost" href="/admin/import.php">Importer</a> <a class="btn" href="/admin/edit.php">+ Nouveau</a></span>
       </div>
       <nav class="filters">
         <?php foreach (['all' => 'Tous', 'auto' => 'Au hasard', 'date' => 'Date précise', 'yearly' => 'Chaque année', 'draft' => 'Brouillons'] as $k => $lbl): ?>

@@ -164,3 +164,20 @@ img { max-width: 100%; }
 .linkish { border: 0; background: none; color: var(--green-dark); text-decoration: underline; font: inherit; cursor: pointer; padding: 0; }
 [hidden] { display: none !important; }
 .card.text-only .card-title + .card-text::before { display: none; }
+
+/* Fonds de saison : choisis automatiquement selon la date (printemps, été, automne, hiver) */
+body.public[class*="season-"] {
+  background-color: var(--bg);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center bottom;
+  background-attachment: fixed;
+}
+body.public.season-printemps { background-image: url("seasons/printemps.svg"); }
+body.public.season-ete       { background-image: url("seasons/ete.svg"); }
+body.public.season-automne   { background-image: url("seasons/automne.svg"); }
+body.public.season-hiver     { background-image: url("seasons/hiver.svg"); }
+body.public .recent a:hover { background: color-mix(in srgb, var(--card) 80%, transparent); }
+@media (prefers-color-scheme: dark) {
+  body.public[class*="season-"] { background-image: none; }
+}

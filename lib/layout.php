@@ -38,8 +38,15 @@ function page_head(array $meta = [], string $bodyClass = ''): void
 <link rel="stylesheet" href="/assets/style.css?v=<?= $v ?>">
 <script src="/assets/app.js?v=<?= $v ?>" defer></script>
 </head>
-<body class="<?= h($bodyClass) ?>">
+<body class="<?= h($bodyClass) ?> season-<?= h(current_season()) ?>">
 <?php
+}
+
+/** Saison affichée ; ?saison=hiver (etc.) permet de prévisualiser les autres fonds. */
+function current_season(): string
+{
+    $preview = $_GET['saison'] ?? '';
+    return in_array($preview, ['printemps', 'ete', 'automne', 'hiver'], true) ? $preview : season();
 }
 
 function page_foot(): void

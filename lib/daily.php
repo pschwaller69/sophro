@@ -56,14 +56,24 @@ function pick_for_day(string $day): ?array
     }
     if ($kind === 'yearly') {
         // Contenus de saison pas encore montrés depuis le début de la période en cours : prioritaires.
-        $fresh = array_filter($rows, fn($r) => (string) $r['last_shown'] < period_start($r, $day));
+        // Les périodes les plus courtes passent en premier : un contenu « 25 décembre » l'emporte le jour J.
+        $fresh = array_values(array_filter($rows, fn($r) => (string) $r['last_shown'] < period_start($r, $day)));
         if ($fresh) {
-            return pick_fair(array_values($fresh));
+            $min = min(array_map('period_length', $fresh));
+            return pick_fair(array_values(array_filter($fresh, fn($r) => period_length($r) === $min)));
         }
         // Tous déjà vus cette saison : on les mélange avec les autres contenus.
         return pick_fair(array_merge($rows, pool_for_day($day)));
     }
     return pick_fair(pool_for_day($day));
+}
+
+/** Durée de la période annuelle, en jours. */
+function period_length(array $c): int
+{
+    $a = (int) date('z', strtotime('2023-' . $c['yearly_start']));
+    $b = (int) date('z', strtotime('2023-' . $c['yearly_end']));
+    return ($b - $a + 365) % 365 + 1;
 }
 
 /** Date (AAAA-MM-JJ) du début de la période annuelle qui contient $day. */

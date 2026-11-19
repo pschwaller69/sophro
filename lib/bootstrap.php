@@ -180,6 +180,18 @@ function content_kind(array $c): string
     return 'texte';
 }
 
+/** Saison du jour (pour le fond d'écran) : printemps, ete, automne ou hiver. */
+function season(?string $ymd = null): string
+{
+    $md = substr($ymd ?? date('Y-m-d'), 5);
+    return match (true) {
+        $md >= '03-20' && $md < '06-21' => 'printemps',
+        $md >= '06-21' && $md < '09-22' => 'ete',
+        $md >= '09-22' && $md < '12-21' => 'automne',
+        default                         => 'hiver',
+    };
+}
+
 const JOURS = ['dimanche', 'lundi', 'mardi', 'mercredi', 'jeudi', 'vendredi', 'samedi'];
 const MOIS  = ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
 

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMax slice">
+<defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6e0d2"/><stop offset=".5" stop-color="#f7ece2"/><stop offset="1" stop-color="#f6f3ee"/></linearGradient>
+<radialGradient id="sun"><stop offset="0" stop-color="#fff4e2"/><stop offset=".55" stop-color="#ffe9cf" stop-opacity=".8"/><stop offset="1" stop-color="#ffe9cf" stop-opacity="0"/></radialGradient></defs>
+<rect width="1600" height="1000" fill="url(#s)"/>
+<circle cx="960" cy="330" r="230" fill="url(#sun)"/>
+<circle cx="960" cy="330" r="80" fill="#fff5e6"/>
+<rect y="730" width="1600" height="120" fill="#d9e3e6"/>
+<g fill="#fff5e6" opacity=".8"><ellipse cx="960" cy="760" rx="110" ry="6"/><ellipse cx="960" cy="790" rx="70" ry="4"/></g>
+<path d="M0 840 C300 800 600 830 900 850 C1150 866 1350 820 1600 835 L1600 1000 L0 1000Z" fill="#efe2cf"/>
+<path d="M260 230 q12 -10 24 0 q12 -10 24 0" stroke="#b2a2c9" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+<path d="M330 190 q9 -8 18 0 q9 -8 18 0" stroke="#b2a2c9" stroke-width="3" fill="none" stroke-linecap="round"/>
+</svg>

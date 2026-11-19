@@ -15,6 +15,18 @@ Hébergée sur **https://sophro.schwaller.fr** (o2switch), déployée automatiqu
 - **Partage** : sur téléphone, le menu de partage natif (WhatsApp, Instagram, Messenger, SMS… avec l'image quand il y en a une) ; sur ordinateur, un menu Facebook / WhatsApp / X / LinkedIn / e-mail / copier le lien.
   Chaque contenu a son lien `/p/<numéro>` avec un aperçu (titre, texte, image) sur les réseaux sociaux ; pour un texte seul, une image est générée automatiquement.
 
+## Import de contenus (CSV)
+
+Admin → *Importer* : un fichier CSV avec les colonnes `titre ; texte ; quand ; date ; debut ; fin`
+(`quand` = `hasard`, `date` avec `date` en JJ/MM/AAAA, ou `saison` avec `debut`/`fin` en JJ/MM).
+Les doublons (même titre et même texte) sont ignorés : réimporter le même fichier est sans risque.
+Pour une période annuelle, les contenus d'un seul jour (ex. 25/12) passent avant ceux d'une période plus longue.
+
+## Fonds de saison
+
+Le fond du site public change tout seul : printemps (20 mars), été (21 juin), automne (22 septembre), hiver (21 décembre).
+Fichiers : `assets/seasons/*.svg`. Aperçu d'une autre saison : `/?saison=printemps` (ou `ete`, `automne`, `hiver`).
+
 ## Notification du matin et publication automatique
 
 Une seule tâche cron, chaque matin à 7 h 30 (cPanel → *Tâches cron*) :
