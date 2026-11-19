@@ -7,12 +7,21 @@ require ROOT . '/lib/daily.php';
 require ROOT . '/lib/layout.php';
 
 $error = null;
-if (($_POST['action'] ?? '') === 'login') {
+$setup = !password_is_set();
+if ($setup && ($_POST['action'] ?? '') === 'setup') {
+    $error = set_password((string) ($_POST['password'] ?? ''), (string) ($_POST['confirm'] ?? ''));
+    if (!$error) {
+        login_session();
+        header('Location: /admin/?welcome=1');
+        exit;
+    }
+}
+if (!$setup && ($_POST['action'] ?? '') === 'login') {
     if (try_login((string) ($_POST['password'] ?? ''))) {
         header('Location: /admin/');
         exit;
     }
-    $error = cfg('admin_password_hash') ? 'Mot de passe incorrect.' : "Aucun mot de passe n'est configuré sur le serveur.";
+    $error = 'Mot de passe incorrect.';
 }
 
 if (!is_admin()) {
@@ -21,12 +30,24 @@ if (!is_admin()) {
     <main class="wrap narrow">
       <h1 class="admin-title">Espace sophrologue</h1>
       <form method="post" class="form card"><div class="card-body">
-        <input type="hidden" name="action" value="login">
         <?php if ($error): ?><p class="alert error"><?= h($error) ?></p><?php endif ?>
-        <label>Mot de passe
-          <input type="password" name="password" autocomplete="current-password" required autofocus>
-        </label>
-        <button class="btn">Se connecter</button>
+        <?php if ($setup): ?>
+          <input type="hidden" name="action" value="setup">
+          <p>Bienvenue ! Choisissez le mot de passe de l'administration (8 caractères minimum).</p>
+          <label>Nouveau mot de passe
+            <input type="password" name="password" autocomplete="new-password" minlength="8" required autofocus>
+          </label>
+          <label>Confirmez le mot de passe
+            <input type="password" name="confirm" autocomplete="new-password" minlength="8" required>
+          </label>
+          <button class="btn">Créer le mot de passe</button>
+        <?php else: ?>
+          <input type="hidden" name="action" value="login">
+          <label>Mot de passe
+            <input type="password" name="password" autocomplete="current-password" required autofocus>
+          </label>
+          <button class="btn">Se connecter</button>
+        <?php endif ?>
       </div></form>
       <p class="center"><a href="/">← Retour au site</a></p>
     </main>
@@ -72,10 +93,12 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
 ?>
 <header class="site-header">
   <a href="/admin/" class="brand"><img src="/assets/icon.svg" alt="" width="36" height="36"><span>Administration</span></a>
-  <nav><a href="/" target="_blank">Voir le site</a> · <a href="/admin/logout.php">Déconnexion</a></nav>
+  <nav><a href="/" target="_blank">Voir le site</a> · <a href="/admin/password.php">Mot de passe</a> · <a href="/admin/logout.php">Déconnexion</a></nav>
 </header>
 
 <main class="wrap wide">
+  <?php if (isset($_GET['welcome'])): ?><p class="alert ok">Mot de passe créé ✔ Vous pouvez maintenant ajouter vos contenus.</p><?php endif ?>
+  <?php if (isset($_GET['pw'])): ?><p class="alert ok">Mot de passe modifié ✔</p><?php endif ?>
   <?php if (isset($_GET['ok'])): ?><p class="alert ok">Enregistré ✔</p><?php endif ?>
   <?php if (isset($_GET['deleted'])): ?><p class="alert ok">Contenu supprimé.</p><?php endif ?>
 

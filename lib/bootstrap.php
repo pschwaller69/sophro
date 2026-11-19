@@ -11,7 +11,7 @@ $GLOBALS['CONFIG'] = array_merge([
     'site_name'           => 'Sophro du jour',
     'site_tagline'        => 'Une pause sophrologie, chaque jour',
     'site_url'            => '',      // ex. https://sophro.schwaller.fr (détecté automatiquement si vide)
-    'admin_password_hash' => '',      // généré au déploiement depuis le secret GitHub ADMIN_PASSWORD
+    'admin_password_hash' => '',      // facultatif : sinon le mot de passe est créé depuis /admin/ et stocké en base
 ], is_file($__cfgFile) ? (array) require $__cfgFile : []);
 
 function cfg(string $key)
@@ -91,7 +91,24 @@ function migrate(PDO $pdo): void
             content_id INTEGER NOT NULL REFERENCES contents(id) ON DELETE CASCADE
         );
         CREATE INDEX IF NOT EXISTS daily_content ON daily(content_id);
+        CREATE TABLE IF NOT EXISTS settings (
+            key   TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
     ");
+}
+
+function setting(string $key): ?string
+{
+    $st = db()->prepare('SELECT value FROM settings WHERE key = ?');
+    $st->execute([$key]);
+    $v = $st->fetchColumn();
+    return $v === false ? null : (string) $v;
+}
+
+function set_setting(string $key, string $value): void
+{
+    db()->prepare('INSERT OR REPLACE INTO settings(key, value) VALUES(?, ?)')->execute([$key, $value]);
 }
 
 function get_content(int $id): ?array

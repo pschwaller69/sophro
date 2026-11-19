@@ -1,8 +1,7 @@
 <?php
-// Copie de config.local.php (créé automatiquement au déploiement par GitHub Actions).
-// Pour tester en local : cp tools/config.example.php config.local.php
+// Fichier de configuration facultatif : copiez-le en config.local.php à la racine du site.
+// Sans ce fichier, le site fonctionne : le mot de passe admin est créé à la première visite de /admin/.
 return [
-    'site_url' => '',
-    // mot de passe de test : "sophro"
-    'admin_password_hash' => password_hash('sophro', PASSWORD_DEFAULT),
+    // 'site_url' => 'https://sophro.schwaller.fr',
+    // 'site_name' => 'Sophro du jour',
 ];

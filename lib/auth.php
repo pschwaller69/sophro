@@ -24,16 +24,44 @@ function is_admin(): bool
     return !empty($_SESSION['admin']);
 }
 
+function admin_hash(): string
+{
+    return (string) (cfg('admin_password_hash') ?: setting('admin_password_hash'));
+}
+
+function password_is_set(): bool
+{
+    return admin_hash() !== '';
+}
+
+/** Enregistre un nouveau mot de passe. Retourne un message d'erreur, ou null si tout va bien. */
+function set_password(string $pw, string $confirm): ?string
+{
+    if (mb_strlen($pw) < 8) {
+        return 'Le mot de passe doit contenir au moins 8 caractères.';
+    }
+    if ($pw !== $confirm) {
+        return 'Les deux mots de passe ne sont pas identiques.';
+    }
+    set_setting('admin_password_hash', password_hash($pw, PASSWORD_DEFAULT));
+    return null;
+}
+
+function login_session(): void
+{
+    start_session();
+    session_regenerate_id(true);
+    $_SESSION['admin'] = true;
+}
+
 function try_login(string $password): bool
 {
-    $hash = (string) cfg('admin_password_hash');
+    $hash = admin_hash();
     if ($hash === '' || !password_verify($password, $hash)) {
         usleep(800000); // ralentit les essais au hasard
         return false;
     }
-    start_session();
-    session_regenerate_id(true);
-    $_SESSION['admin'] = true;
+    login_session();
     return true;
 }
 

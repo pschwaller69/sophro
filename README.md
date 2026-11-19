@@ -28,25 +28,25 @@ PHP 8 + SQLite, sans dépendance ni étape de compilation.
 | `uploads/` | Images et audios envoyés (non versionnés, jamais écrasés au déploiement) |
 | `sw.js`, `manifest.webmanifest`, `assets/` | Application installable, styles, icônes, police Lora (licence OFL) |
 
-## Déploiement (GitHub Actions → FTP o2switch)
+## Mise en ligne (Git cPanel chez o2switch)
 
-Chaque `push` sur `main` envoie le site sur o2switch (`.github/workflows/deploy.yml`).
-À configurer une fois dans GitHub, *Settings → Secrets and variables → Actions* :
+o2switch récupère le code depuis ce dépôt (cPanel → *Git Version Control*, avec une tâche cron qui fait `git pull`).
+Le dossier cloné doit être la racine du sous-domaine `sophro.schwaller.fr` (SSL activé, PHP 8.1 ou plus).
 
-| Secret | Valeur |
-|---|---|
-| `FTP_SERVER` | serveur FTP o2switch (ex. `ftp.schwaller.fr`, visible dans cPanel → Comptes FTP) |
-| `FTP_USERNAME` | identifiant FTP (idéalement un compte FTP limité au dossier du sous-domaine) |
-| `FTP_PASSWORD` | mot de passe de ce compte FTP |
-| `ADMIN_PASSWORD` | mot de passe de l'administration du site |
+- **Aucun identifiant dans GitHub.** À la première visite de `/admin/`, le site demande de créer le mot de passe d'administration (stocké chiffré dans la base). Il se change ensuite dans l'admin, menu *Mot de passe*.
+  À faire juste après la première mise en ligne, pour que personne d'autre ne le crée avant.
+- `data/` (base SQLite) et `uploads/` (images, audios) ne sont pas dans Git : un `git pull` ne les touche jamais.
+- Le dossier `.git`, `lib/`, `data/` et `tools/` sont bloqués par `.htaccess`.
+- GitHub Actions vérifie seulement la syntaxe PHP à chaque envoi (`.github/workflows/check.yml`).
 
-Variables facultatives (onglet *Variables*) : `FTP_DIR` (dossier du sous-domaine sur le serveur, par défaut `sophro.schwaller.fr/` ; mettre `/` si le compte FTP est déjà limité à ce dossier) et `SITE_URL` (par défaut `https://sophro.schwaller.fr`).
+Exemple de tâche cron (cPanel → *Tâches cron*, toutes les 15 minutes) :
 
-Côté o2switch : créer le sous-domaine `sophro.schwaller.fr` dans cPanel (dossier `sophro.schwaller.fr`) et activer le certificat SSL (AutoSSL). PHP 8.1 ou plus.
+```sh
+cd ~/sophro.schwaller.fr && git pull --ff-only -q
+```
 
 ## Tester en local
 
 ```sh
-cp tools/config.example.php config.local.php   # mot de passe admin de test : sophro
 php -S localhost:8000 tools/router.php
 ```
