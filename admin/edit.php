@@ -152,6 +152,23 @@ page_head(['title' => $c['id'] ? 'Modifier' : 'Nouveau contenu', 'noindex' => tr
         <audio controls preload="metadata" src="<?= h(media_url($c['audio'])) ?>"></audio>
         <label class="inline"><input type="checkbox" name="remove_audio"> Retirer l'audio</label>
       <?php endif ?>
+      <div class="recorder" id="recorder" hidden>
+        <p class="muted small">Enregistrer directement avec le micro du téléphone :</p>
+        <div class="rec-controls">
+          <button type="button" class="btn rec-start" data-rec="start">● Enregistrer</button>
+          <button type="button" class="btn btn-ghost" data-rec="pause" hidden>❚❚ Pause</button>
+          <button type="button" class="btn btn-ghost" data-rec="resume" hidden>● Reprendre</button>
+          <button type="button" class="btn" data-rec="stop" hidden>■ Terminer</button>
+          <span class="rec-time" hidden>0:00</span>
+        </div>
+        <div class="rec-result" hidden>
+          <audio controls></audio>
+          <p class="small"><span class="rec-ok">✔ Cet enregistrement sera ajouté au contenu quand vous cliquerez sur « Enregistrer » en bas.</span>
+            <button type="button" class="linkish" data-rec="restart">Recommencer</button></p>
+        </div>
+        <p class="alert error rec-error" hidden></p>
+        <p class="muted small">… ou choisir un fichier audio :</p>
+      </div>
       <input type="file" name="audio" accept="audio/*,.mp3,.m4a">
     </fieldset>
 

@@ -149,6 +149,75 @@
     openShareMenu(data);
   });
 
+  // --- Admin : enregistreur audio (micro du téléphone) ---
+  function initRecorder(form) {
+    const box = document.getElementById('recorder');
+    const input = form.querySelector('input[name=audio]');
+    if (!box || !input || !window.MediaRecorder || !navigator.mediaDevices?.getUserMedia || !window.DataTransfer) return;
+    box.hidden = false;
+    const $ = (sel) => box.querySelector(sel);
+    const btn = (name) => box.querySelector(`[data-rec=${name}]`);
+    // MP4/AAC d'abord : lisible partout (Android, iPhone, ordinateurs)
+    const type = ['audio/mp4;codecs=mp4a.40.2', 'audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus']
+      .find((t) => MediaRecorder.isTypeSupported(t)) || '';
+    let rec = null, stream = null, chunks = [], seconds = 0, timer = null, wakeLock = null;
+
+    const show = (state) => {
+      btn('start').hidden = state !== 'idle';
+      btn('pause').hidden = state !== 'rec';
+      btn('resume').hidden = state !== 'paused';
+      btn('stop').hidden = state !== 'rec' && state !== 'paused';
+      $('.rec-time').hidden = state === 'idle';
+      $('.rec-time').classList.toggle('live', state === 'rec');
+    };
+    const tick = () => { $('.rec-time').textContent = Math.floor(seconds / 60) + ':' + String(seconds % 60).padStart(2, '0'); };
+    const error = (msg) => { const e = $('.rec-error'); e.textContent = msg; e.hidden = !msg; };
+
+    btn('start').addEventListener('click', async () => {
+      error('');
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: true } });
+      } catch (e) {
+        return error("Impossible d'accéder au micro. Autorisez le micro pour ce site dans les réglages du navigateur.");
+      }
+      chunks = [];
+      rec = new MediaRecorder(stream, type ? { mimeType: type, audioBitsPerSecond: 96000 } : undefined);
+      rec.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+      rec.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        clearInterval(timer);
+        wakeLock?.release().catch(() => {});
+        const mime = (rec.mimeType || type || 'audio/webm').split(';')[0];
+        const ext = mime.includes('mp4') ? 'm4a' : mime.includes('ogg') ? 'ogg' : 'webm';
+        const blob = new Blob(chunks, { type: mime });
+        const file = new File([blob], `seance-${new Date().toISOString().slice(0, 10)}.${ext}`, { type: mime });
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        input.files = dt.files;               // envoyé avec le formulaire, comme un fichier choisi
+        const audio = $('.rec-result audio');
+        audio.src = URL.createObjectURL(blob);
+        $('.rec-result').hidden = false;
+        show('idle');
+        btn('start').hidden = true;
+      };
+      rec.start(1000);
+      seconds = 0; tick();
+      timer = setInterval(() => { if (rec.state === 'recording') { seconds++; tick(); } }, 1000);
+      try { wakeLock = await navigator.wakeLock?.request('screen'); } catch (e) { /* l'écran pourra se mettre en veille */ }
+      $('.rec-result').hidden = true;
+      show('rec');
+    });
+    btn('pause').addEventListener('click', () => { rec.pause(); show('paused'); });
+    btn('resume').addEventListener('click', () => { rec.resume(); show('rec'); });
+    btn('stop').addEventListener('click', () => rec.stop());
+    btn('restart').addEventListener('click', () => {
+      input.value = '';
+      $('.rec-result').hidden = true;
+      show('idle');
+    });
+    show('idle');
+  }
+
   // --- Admin : options selon le mode de publication ---
   const form = document.getElementById('edit-form');
   if (form) {
@@ -167,6 +236,7 @@
       };
       set('ys', s); set('ye', e);
     }));
+    initRecorder(form);
     form.addEventListener('submit', () => {
       const btn = form.querySelector('button[type=submit]');
       btn.disabled = true;

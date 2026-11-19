@@ -194,3 +194,13 @@ body.public .recent a:hover { background: color-mix(in srgb, var(--card) 80%, tr
 .up-title { font-weight: 600; }
 .up-text { flex-basis: 100%; color: var(--muted); font-family: Lora, Georgia, serif; font-style: italic; font-size: .9rem; line-height: 1.45; }
 .upcoming li { align-items: flex-start; }
+
+.recorder { margin: 6px 0 4px; }
+.rec-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.rec-start { background: #b4534a; }
+.rec-start:hover { background: #9c463e; }
+.rec-time { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--muted); }
+.rec-time.live { color: #b4534a; }
+.rec-time.live::before { content: "● "; animation: blink 1s infinite; }
+@keyframes blink { 50% { opacity: .2; } }
+.rec-result audio { width: 100%; margin-top: 10px; }

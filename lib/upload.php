@@ -42,6 +42,8 @@ function handle_upload(string $field, string $kind): ?string
     }
     if ($kind === 'image') {
         $name = optimize_image("$dir/$name", $name);
+    } elseif (in_array($types[$mime], ['webm', 'ogg', 'wav'], true)) {
+        $name = convert_audio_to_m4a("$dir/$name", $name);
     }
     return $name;
 }
@@ -85,6 +87,30 @@ function optimize_image(string $path, string $name): string
         @unlink($path);
     }
     return $newName;
+}
+
+/**
+ * WebM/Ogg/WAV → M4A (AAC) si ffmpeg est disponible sur le serveur, pour que l'audio soit lisible
+ * sur iPhone. Sinon le fichier est gardé tel quel.
+ */
+function convert_audio_to_m4a(string $path, string $name): string
+{
+    if (!function_exists('exec') || in_array('exec', array_map('trim', explode(',', (string) ini_get('disable_functions'))), true)) {
+        return $name;
+    }
+    $ffmpeg = trim((string) @exec('command -v ffmpeg 2>/dev/null'));
+    if ($ffmpeg === '') {
+        return $name;
+    }
+    $newName = preg_replace('/\.\w+$/', '.m4a', $name);
+    $out = dirname($path) . '/' . $newName;
+    @exec(escapeshellarg($ffmpeg) . ' -y -loglevel error -i ' . escapeshellarg($path) . ' -vn -c:a aac -b:a 96k ' . escapeshellarg($out) . ' 2>&1', $o, $code);
+    if ($code === 0 && is_file($out) && filesize($out) > 0) {
+        @unlink($path);
+        return $newName;
+    }
+    @unlink($out);
+    return $name;
 }
 
 function delete_media(?string $file): void
