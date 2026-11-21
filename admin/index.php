@@ -110,14 +110,14 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
 </header>
 
 <main class="wrap wide">
-  <?php if (isset($_GET['welcome'])): ?><p class="alert ok">Mot de passe créé ✔ Vous pouvez maintenant ajouter vos contenus.</p><?php endif ?>
+  <?php if (isset($_GET['welcome'])): ?><p class="alert ok">Mot de passe créé ✔ Vous pouvez maintenant ajouter vos pauses.</p><?php endif ?>
   <?php if (isset($_GET['pw'])): ?><p class="alert ok">Mot de passe modifié ✔</p><?php endif ?>
   <?php if (isset($_GET['ok'])): ?><p class="alert ok">Enregistré ✔</p><?php endif ?>
-  <?php if (isset($_GET['deleted'])): ?><p class="alert ok">Contenu supprimé.</p><?php endif ?>
+  <?php if (isset($_GET['deleted'])): ?><p class="alert ok">Pause supprimée.</p><?php endif ?>
 
   <div class="admin-grid">
     <section>
-      <h2>Aujourd'hui, <?= h(date_fr($today)) ?></h2>
+      <h2>La pause d'aujourd'hui, <?= h(date_fr($today)) ?></h2>
       <?php if ($todayContent): ?>
         <?= render_content($todayContent) ?>
         <div class="actions">
@@ -125,7 +125,7 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
           <a class="btn btn-ghost" href="/admin/edit.php?id=<?= (int) $todayContent['id'] ?>">Modifier</a>
         </div>
       <?php else: ?>
-        <p class="muted">Aucun contenu pour l'instant. Créez le premier !</p>
+        <p class="muted">Aucune pause pour l'instant. Créez la première !</p>
       <?php endif ?>
 
       <h2>Les 14 prochains jours</h2>
@@ -134,7 +134,7 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
           <li class="up-<?= $uc ? h($uc['mode']) : 'auto' ?>">
             <span class="up-day"><?= h(date_fr($d)) ?></span>
             <?php if (!$uc): ?>
-              <span class="muted">Aucun contenu disponible</span>
+              <span class="muted">Aucune pause disponible</span>
             <?php else: ?>
               <div class="up-content">
                 <a href="/admin/edit.php?id=<?= (int) $uc['id'] ?>" class="up-title"><?= h(content_label($uc)) ?></a>
@@ -153,8 +153,8 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
 
     <section>
       <div class="list-head">
-        <h2>Contenus (<?= (int) $counts['total'] ?>)</h2>
-        <span><a class="btn btn-ghost" href="/admin/import.php">Importer</a> <a class="btn" href="/admin/edit.php">+ Nouveau</a></span>
+        <h2>Mes pauses (<?= (int) $counts['total'] ?>)</h2>
+        <span><a class="btn btn-ghost" href="/admin/import.php">Importer</a> <a class="btn" href="/admin/edit.php">+ Nouvelle pause</a></span>
       </div>
       <nav class="filters">
         <?php foreach (['all' => 'Tous', 'auto' => 'Au hasard', 'date' => 'Date précise', 'yearly' => 'Chaque année', 'draft' => 'Brouillons'] as $k => $lbl): ?>
@@ -172,7 +172,7 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
               <a href="/admin/edit.php?id=<?= (int) $c['id'] ?>" class="info-title"><?= h(content_label($c)) ?></a>
               <span class="badge mode-<?= h($c['mode']) ?>"><?= h(mode_label($c)) ?></span>
               <?php if (!$c['active']): ?><span class="badge draft">Brouillon</span><?php endif ?>
-              <span class="muted small"><?= $c['shown'] ? 'Montré ' . (int) $c['shown'] . ' fois, dernière fois le ' . h(date_fr((string) $c['last_shown'], false, true)) : 'Jamais montré' ?></span>
+              <span class="muted small"><?= $c['shown'] ? 'Montrée ' . (int) $c['shown'] . ' fois, dernière fois le ' . h(date_fr((string) $c['last_shown'], false, true)) : 'Jamais montrée' ?></span>
             </div>
             <div class="row-actions">
               <?php if (is_public($c)): ?><?= share_button($c, '', 'icon-btn') ?><?php endif ?>

@@ -155,19 +155,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-page_head(['title' => 'Importer', 'noindex' => true], 'admin');
+page_head(['title' => 'Importer des pauses', 'noindex' => true], 'admin');
 ?>
 <header class="site-header">
   <a href="/admin/" class="brand"><img src="/assets/icon.svg" alt="" width="36" height="36"><span>Administration</span></a>
   <nav><a href="/admin/">← Retour</a></nav>
 </header>
 <main class="wrap">
-  <h1 class="admin-title">Importer des contenus</h1>
+  <h1 class="admin-title">Importer des pauses</h1>
   <?php if ($error): ?><p class="alert error"><?= h($error) ?></p><?php endif ?>
   <?php if ($report): ?>
     <p class="alert ok">
-      <strong><?= $report['added'] ?></strong> contenu(s) ajouté(s).
-      <?php if ($report['dupes']): ?><?= $report['dupes'] ?> déjà présent(s), ignoré(s).<?php endif ?>
+      <strong><?= $report['added'] ?></strong> pause(s) ajoutée(s).
+      <?php if ($report['dupes']): ?><?= $report['dupes'] ?> déjà présente(s), ignorée(s).<?php endif ?>
       <?php if ($report['empty']): ?><?= $report['empty'] ?> ligne(s) vide(s).<?php endif ?>
       <a href="/admin/">Voir la liste →</a>
     </p>
@@ -194,7 +194,7 @@ page_head(['title' => 'Importer', 'noindex' => true], 'admin');
       <li><strong>date</strong> : pour <em>date</em>, au format JJ/MM/AAAA ; pour <em>chaque année</em> sur un seul jour, JJ/MM (ex. 25/12) ;</li>
       <li><strong>debut</strong> et <strong>fin</strong> : pour <em>chaque année</em> sur une période, au format JJ/MM (ex. 18/12 et 26/12).</li>
     </ul>
-    <p class="muted">Un contenu qui existe déjà (même titre et même texte) n'est pas importé une deuxième fois : vous pouvez réimporter le même fichier sans risque.</p>
+    <p class="muted">Une pause qui existe déjà (même titre et même texte) n'est pas importée une deuxième fois : vous pouvez réimporter le même fichier sans risque.</p>
   </div></section>
 </main>
 <?php page_foot();

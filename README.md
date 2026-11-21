@@ -1,6 +1,6 @@
 # Sophro du jour
 
-Application web installable (PWA) : chaque jour, une publication de sophrologie (phrase, image et/ou mini-séance audio).
+Application web installable (PWA) : chaque jour, une **pause** de sophrologie (phrase, image et/ou mini-séance audio). Dans l'interface, chaque publication s'appelle une « pause ».
 Hébergée sur **https://sophro.schwaller.fr** (o2switch), déployée automatiquement depuis GitHub.
 
 ## Fonctionnement

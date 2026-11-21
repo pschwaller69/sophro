@@ -27,7 +27,7 @@ $today = date('Y-m-d');
 
 $c = content_for_day($today);
 if (!$c) {
-    echo "$today : aucun contenu, rien à faire.\n";
+    echo "$today : aucune pause, rien à faire.\n";
     exit(0);
 }
 echo "$today : « " . content_label($c) . " »\n";

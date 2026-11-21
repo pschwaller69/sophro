@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $msg = 'Réglages enregistrés ✔';
     } elseif (($_POST['action'] ?? '') === 'post_now') {
         $c = content_for_day(date('Y-m-d'));
-        $result = $c ? post_to_socials($c) : ['Aucun contenu aujourd\'hui.'];
+        $result = $c ? post_to_socials($c) : ['Aucune pause aujourd\'hui.'];
     }
 }
 
@@ -59,7 +59,7 @@ page_head(['title' => 'Réseaux sociaux', 'noindex' => true], 'admin');
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="save">
     <h2>Publication automatique</h2>
-    <p class="muted small">Chaque matin, le contenu du jour est publié sur les réseaux cochés ci-dessous (texte + image ; pour un texte seul, une image est créée automatiquement).</p>
+    <p class="muted small">Chaque matin, la pause du jour est publiée sur les réseaux cochés ci-dessous (texte + image ; pour un texte seul, une image est créée automatiquement).</p>
 
     <fieldset>
       <legend>Page Facebook</legend>
@@ -87,10 +87,10 @@ page_head(['title' => 'Réseaux sociaux', 'noindex' => true], 'admin');
     <div class="actions"><button class="btn">Enregistrer</button></div>
   </div></form>
 
-  <form method="post" class="center" onsubmit="return confirm('Publier maintenant le contenu du jour sur les réseaux activés ?')">
+  <form method="post" class="center" onsubmit="return confirm('Publier maintenant la pause du jour sur les réseaux activés ?')">
     <?= csrf_field() ?>
     <input type="hidden" name="action" value="post_now">
-    <button class="btn btn-ghost">Publier le contenu du jour maintenant</button>
+    <button class="btn btn-ghost">Publier la pause du jour maintenant</button>
   </form>
 
   <?php if ($log): ?>
