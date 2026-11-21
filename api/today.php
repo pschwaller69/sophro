@@ -12,11 +12,11 @@ $c = content_for_day(date('Y-m-d'));
 $kind = $c ? content_kind($c) : 'texte';
 echo json_encode([
     'title' => match ($kind) {
-        'audio' => 'Votre pause du jour : une mini-séance',
-        'image' => 'Votre pause du jour est arrivée',
-        default => 'Votre pause du jour est arrivée',
+        'audio' => 'Votre instant du jour : une mini-séance',
+        'image' => 'Votre instant du jour est arrivé',
+        default => 'Votre instant du jour est arrivé',
     },
-    'body'  => $c ? (trim((string) $c['title']) !== '' ? $c['title'] : excerpt((string) $c['body'], 120)) : 'Prenez un instant pour vous.',
+    'body'  => $c ? (trim((string) $c['title']) !== '' ? $c['title'] : excerpt((string) $c['body'], 120)) : 'Prenez le temps de respirer.',
     'image' => $c && $c['image'] ? media_url($c['image']) : null,
     'url'   => '/?source=notification',
 ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

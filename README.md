@@ -1,6 +1,6 @@
 # Sophro du jour
 
-Application web installable (PWA) : chaque jour, une **pause** de sophrologie (phrase, image et/ou mini-séance audio). Dans l'interface, chaque publication s'appelle une « pause ».
+Application web installable (PWA) : chaque jour, un **instant** de sophrologie (phrase, image et/ou mini-séance audio). Dans l'interface, chaque publication s'appelle un « instant ».
 Hébergée sur **https://sophro.schwaller.fr** (o2switch), déployée automatiquement depuis GitHub.
 
 ## Fonctionnement
@@ -36,7 +36,7 @@ php ~/sophro.schwaller.fr/cron/daily.php >> ~/sophro-cron.log 2>&1
 ```
 
 Elle fixe le contenu du jour, puis :
-- **envoie la notification** « Votre pause du jour est arrivée » à ceux qui ont touché « Me prévenir chaque jour » dans l'app, et pose une **pastille** sur l'icône (effacée à l'ouverture). Android : oui. iPhone : iOS 16.4+, app ajoutée à l'écran d'accueil. Les clés de notification (VAPID) sont créées automatiquement par le serveur ;
+- **envoie la notification** « Votre instant du jour est arrivé » à ceux qui ont touché « Me prévenir chaque jour » dans l'app, et pose une **pastille** sur l'icône (effacée à l'ouverture). Android : oui. iPhone : iOS 16.4+, app ajoutée à l'écran d'accueil. Les clés de notification (VAPID) sont créées automatiquement par le serveur ;
 - **publie le contenu** sur la Page Facebook et/ou le compte Instagram professionnel, si c'est activé dans l'admin (*Réseaux & notifications* : identifiant de page, identifiant Instagram, jeton d'accès de page Meta). Image utilisée : la photo du contenu, ou une carte carrée générée avec le texte.
 
 Chaque étape n'est faite qu'une fois par jour. Options : `--force`, `--no-push`, `--no-social`.
@@ -78,3 +78,9 @@ cd ~/sophro.schwaller.fr && git pull --ff-only -q
 ```sh
 php -S localhost:8000 tools/router.php
 ```
+
+## Aperçu sur les réseaux sociaux
+
+Chaque instant partagé (texte, image ou audio) a le même aperçu 1200×630 : `og.php?p=<numéro>`.
+Pour une image, la photo est recadrée à ce format avec le titre en bas ; pour un texte, une carte est générée.
+Facebook garde un aperçu en mémoire : après une modification, utiliser l'outil de débogage de partage de Facebook pour le rafraîchir.

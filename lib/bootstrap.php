@@ -9,7 +9,7 @@ define('ROOT', dirname(__DIR__));
 $__cfgFile = ROOT . '/config.local.php';
 $GLOBALS['CONFIG'] = array_merge([
     'site_name'           => 'Sophro du jour',
-    'site_tagline'        => 'Une pause sophrologie, chaque jour',
+    'site_tagline'        => 'Un instant de sophrologie, chaque jour',
     'site_url'            => '',      // ex. https://sophro.schwaller.fr (détecté automatiquement si vide)
     'notify_label'        => '7 h 30',   // heure affichée sur le bouton de notification (l'heure réelle est celle de la tâche cron)
     'admin_password_hash' => '',      // facultatif : sinon le mot de passe est créé depuis /admin/ et stocké en base

@@ -19,7 +19,7 @@ const lora = 'data:font/ttf;base64,' + fs.readFileSync(path.join(A, 'fonts/Lora-
     body{width:1200px;height:630px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;
     background:radial-gradient(circle at 88% 15%,#d5e2d9,transparent 40%),radial-gradient(circle at 8% 95%,#eadcc4,transparent 40%),linear-gradient(#eef3ef,#f6efe4);
     font-family:L,serif;color:#2f3a34}svg{width:150px;height:150px}h1{font-size:76px;margin:0;font-weight:500}p{font-size:34px;margin:0;color:#5f7f6e}</style>
-    ${svg}<h1>Sophro du jour</h1><p>Une pause sophrologie, chaque jour</p>`);
+    ${svg}<h1>Sophro du jour</h1><p>Un instant de sophrologie, chaque jour</p>`);
   await p.screenshot({ path: path.join(A, 'og-default.png') });
   await b.close();
 })();

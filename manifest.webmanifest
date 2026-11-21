@@ -1,7 +1,7 @@
 {
   "name": "Sophro du jour",
   "short_name": "Sophro",
-  "description": "Une pause sophrologie, chaque jour : une phrase, une image ou une mini-séance audio.",
+  "description": "Un instant de sophrologie, chaque jour : une phrase, une image ou une mini-séance audio.",
   "lang": "fr",
   "start_url": "/?source=pwa",
   "scope": "/",

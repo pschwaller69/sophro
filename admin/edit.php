@@ -13,7 +13,7 @@ $id = (int) ($_GET['id'] ?? $_POST['id'] ?? 0);
 $c = $id ? get_content($id) : null;
 if ($id && !$c) {
     http_response_code(404);
-    exit('Pause introuvable.');
+    exit('Instant introuvable.');
 }
 $c = $c ?? [
     'id' => 0, 'title' => '', 'body' => '', 'image' => null, 'audio' => null,
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $new['audio'] = $uploadedAudio;
         }
         if ($new['title'] === '' && $new['body'] === '' && !$new['image'] && !$new['audio']) {
-            throw new RuntimeException('La pause est vide : ajoutez au moins un texte, une image ou un audio.');
+            throw new RuntimeException('L’instant est vide : ajoutez au moins un texte, une image ou un audio.');
         }
 
         $cols = ['title', 'body', 'image', 'audio', 'mode', 'publish_date', 'yearly_start', 'yearly_end', 'active'];
@@ -114,7 +114,7 @@ function md_select(string $prefix, ?string $md): string
     return $out . '</select>';
 }
 
-page_head(['title' => $c['id'] ? 'Modifier la pause' : 'Nouvelle pause', 'noindex' => true], 'admin');
+page_head(['title' => $c['id'] ? 'Modifier l’instant' : 'Nouvel instant', 'noindex' => true], 'admin');
 ?>
 <header class="site-header">
   <a href="/admin/" class="brand"><img src="/assets/icon.svg" alt="" width="36" height="36"><span>Administration</span></a>
@@ -122,7 +122,7 @@ page_head(['title' => $c['id'] ? 'Modifier la pause' : 'Nouvelle pause', 'noinde
 </header>
 
 <main class="wrap">
-  <h1 class="admin-title"><?= $c['id'] ? 'Modifier la pause' : 'Nouvelle pause' ?></h1>
+  <h1 class="admin-title"><?= $c['id'] ? 'Modifier l’instant' : 'Nouvel instant' ?></h1>
   <?php if ($error): ?><p class="alert error"><?= h($error) ?></p><?php endif ?>
 
   <form method="post" enctype="multipart/form-data" class="form card" id="edit-form"><div class="card-body">
@@ -163,7 +163,7 @@ page_head(['title' => $c['id'] ? 'Modifier la pause' : 'Nouvelle pause', 'noinde
         </div>
         <div class="rec-result" hidden>
           <audio controls></audio>
-          <p class="small"><span class="rec-ok">✔ Cet enregistrement sera ajouté à la pause quand vous cliquerez sur « Enregistrer » en bas.</span>
+          <p class="small"><span class="rec-ok">✔ Cet enregistrement sera ajouté à l’instant quand vous cliquerez sur « Enregistrer » en bas.</span>
             <button type="button" class="linkish" data-rec="restart">Recommencer</button></p>
         </div>
         <p class="alert error rec-error" hidden></p>
@@ -175,15 +175,15 @@ page_head(['title' => $c['id'] ? 'Modifier la pause' : 'Nouvelle pause', 'noinde
     <fieldset class="modes">
       <legend>Quand le montrer ?</legend>
       <label class="radio"><input type="radio" name="mode" value="auto" <?= $c['mode'] === 'auto' ? 'checked' : '' ?>>
-        <span><strong>Au hasard</strong><br><small>Elle pourra être tirée au sort les jours sans pause prévue.</small></span></label>
+        <span><strong>Au hasard</strong><br><small>Il pourra être tiré au sort les jours sans instant prévu.</small></span></label>
       <label class="radio"><input type="radio" name="mode" value="date" <?= $c['mode'] === 'date' ? 'checked' : '' ?>>
-        <span><strong>À une date précise</strong><br><small>Montrée ce jour-là, puis elle rejoint les pauses tirées au hasard.</small></span></label>
+        <span><strong>À une date précise</strong><br><small>Montré ce jour-là, puis il rejoint les instants tirés au hasard.</small></span></label>
       <div class="mode-opts" data-for="date">
         <input type="date" name="publish_date" value="<?= h($c['publish_date'] ?? date('Y-m-d', strtotime('+1 day'))) ?>">
         <label class="inline"><input type="checkbox" name="repeat"> Répéter chaque année à cette date <span class="muted">(anniversaire, fête…)</span></label>
       </div>
       <label class="radio"><input type="radio" name="mode" value="yearly" <?= $c['mode'] === 'yearly' ? 'checked' : '' ?>>
-        <span><strong>Chaque année</strong><br><small>Un jour précis (anniversaire, 25 décembre…) ou une période (printemps, Noël…). Jamais tirée au hasard en dehors de ces dates.</small></span></label>
+        <span><strong>Chaque année</strong><br><small>Un jour précis (anniversaire, 25 décembre…) ou une période (printemps, Noël…). Jamais tiré au hasard en dehors de ces dates.</small></span></label>
       <div class="mode-opts" data-for="yearly">
         <div class="presets">
           <button type="button" data-preset="12-25,12-25">Jour de Noël</button>
@@ -210,11 +210,11 @@ page_head(['title' => $c['id'] ? 'Modifier la pause' : 'Nouvelle pause', 'noinde
   </div></form>
 
   <?php if ($c['id']): ?>
-    <form method="post" class="delete-form" onsubmit="return confirm('Supprimer définitivement cette pause ?')">
+    <form method="post" class="delete-form" onsubmit="return confirm('Supprimer définitivement cet instant ?')">
       <?= csrf_field() ?>
       <input type="hidden" name="id" value="<?= (int) $c['id'] ?>">
       <input type="hidden" name="action" value="delete">
-      <button class="btn btn-danger">Supprimer cette pause</button>
+      <button class="btn btn-danger">Supprimer cet instant</button>
     </form>
   <?php endif ?>
 </main>

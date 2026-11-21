@@ -26,6 +26,7 @@ function page_head(array $meta = [], string $bodyClass = ''): void
 <meta property="og:description" content="<?= h($desc) ?>">
 <meta property="og:url" content="<?= h($url) ?>">
 <meta property="og:image" content="<?= h($image) ?>">
+<?php if (str_contains($image, '/og.php')): ?><meta property="og:image:type" content="image/jpeg"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><?php endif ?>
 <?php if (!empty($meta['audio'])): ?><meta property="og:audio" content="<?= h($meta['audio']) ?>"><?php endif ?>
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#5f7f6e">
@@ -142,8 +143,6 @@ function render_content(array $c): string
 /** Image Open Graph : l'image du contenu, ou une carte générée avec le texte. */
 function og_image_url(array $c): string
 {
-    if ($c['image']) {
-        return base_url() . media_url($c['image']);
-    }
+    // Tous les instants (texte, image, audio) ont le même aperçu 1200×630 sur les réseaux sociaux
     return base_url() . '/og.php?p=' . (int) $c['id'] . '&v=' . substr(md5($c['updated_at']), 0, 6);
 }

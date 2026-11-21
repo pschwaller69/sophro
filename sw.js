@@ -1,5 +1,5 @@
 // Service worker : permet l'installation et l'affichage hors connexion du dernier contenu consulté.
-const VERSION = 'sophro-v3';
+const VERSION = 'sophro-v4';
 const STATIC = ['/', '/assets/style.css', '/assets/app.js', '/assets/icon.svg', '/assets/fonts/Lora.ttf', '/assets/fonts/Lora-Italic.ttf', '/manifest.webmanifest', '/assets/seasons/printemps.svg', '/assets/seasons/ete.svg', '/assets/seasons/automne.svg', '/assets/seasons/hiver.svg'];
 
 self.addEventListener('install', (e) => {
@@ -48,7 +48,7 @@ self.addEventListener('fetch', (e) => {
 // Notification du matin : le serveur envoie un simple signal, on va chercher le contenu du jour.
 self.addEventListener('push', (e) => {
   e.waitUntil((async () => {
-    let d = { title: 'Votre pause du jour est arrivée', body: 'Prenez un instant pour vous.', url: '/' };
+    let d = { title: 'Votre instant du jour est arrivé', body: 'Prenez le temps de respirer.', url: '/' };
     try { d = await (await fetch('/api/today.php', { cache: 'no-store' })).json(); } catch (err) { /* message par défaut */ }
     if (self.navigator.setAppBadge) { try { await self.navigator.setAppBadge(1); } catch (err) {} }
     await self.registration.showNotification(d.title, {

@@ -63,7 +63,7 @@ function post_instagram(array $c): string
     $ig = trim((string) setting('ig_user_id'));
     $token = trim((string) setting('fb_token'));
     // Instagram n'affiche pas les liens cliquables dans les légendes : on renvoie vers le lien du profil.
-    $caption = social_caption($c) . "\n\n✨ Retrouvez chaque jour une pause sophrologie : lien dans la bio.";
+    $caption = social_caption($c) . "\n\n✨ Retrouvez chaque jour un instant de sophrologie : lien dans la bio.";
     $media = graph_post("$ig/media", ['image_url' => social_image_url($c), 'caption' => $caption, 'access_token' => $token]);
     // Instagram traite l'image quelques secondes avant de pouvoir la publier
     $last = null;

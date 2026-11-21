@@ -53,18 +53,18 @@ page_head($meta, 'public');
 
 <main class="wrap">
   <p class="today-label">
-    <?= $isPermalink ? 'Une pause partagée avec vous' : 'La pause du jour · ' . h(date_fr($today)) ?>
+    <?= $isPermalink ? 'Un instant partagé avec vous' : 'L’instant du jour · ' . h(date_fr($today)) ?>
   </p>
 
   <?php if ($c): ?>
     <?= render_content($c) ?>
     <div class="actions">
       <?= share_button($c) ?>
-      <?php if ($isPermalink): ?><a class="btn btn-ghost" href="/">Voir la pause du jour</a><?php endif ?>
+      <?php if ($isPermalink): ?><a class="btn btn-ghost" href="/">Voir l’instant du jour</a><?php endif ?>
     </div>
   <?php else: ?>
     <article class="card text-only"><div class="card-body">
-      <div class="card-text">Prenez un instant pour respirer profondément… La première pause arrive très bientôt.</div>
+      <div class="card-text">Prenez le temps de respirer profondément… Le premier instant arrive très bientôt.</div>
     </div></article>
   <?php endif ?>
 

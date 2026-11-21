@@ -14,17 +14,20 @@ if (!$c || !is_public($c) || !function_exists('imagettftext')) {
     exit;
 }
 
-$jpg = ($_GET['format'] ?? '') === 'jpg';
-$ext = $jpg ? 'jpg' : 'png';
+$jpg = ($_GET['format'] ?? '') === 'jpg';   // carré/Instagram ; sinon aperçu large 1200×630
+$ext = $jpg ? 'jpg' : 'og.jpg';
 $cacheDir = ROOT . '/uploads/og';
-$cacheFile = $cacheDir . '/' . (int) $c['id'] . '-' . md5($c['updated_at'] . $c['title'] . $c['body'] . $c['image']) . '.' . $ext;
+$hash = md5($c['updated_at'] . $c['title'] . $c['body'] . $c['image']);
+$cacheFile = $cacheDir . '/' . (int) $c['id'] . '-' . $hash . '.' . $ext;
 
 if (!is_file($cacheFile)) {
     if (!is_dir($cacheDir)) {
         mkdir($cacheDir, 0775, true);
     }
-    foreach (glob($cacheDir . '/' . (int) $c['id'] . '-*.' . $ext) ?: [] as $old) {
-        @unlink($old);
+    foreach (glob($cacheDir . '/' . (int) $c['id'] . '-*') ?: [] as $old) {
+        if (!str_contains($old, $hash)) {
+            @unlink($old); // anciennes versions de l'image
+        }
     }
 }
 
@@ -46,6 +49,41 @@ if (!is_file($cacheFile) && $jpg && $c['image']) {
         imagefill($dst, 0, 0, imagecolorallocate($dst, 255, 255, 255));
         imagecopyresampled($dst, $src, 0, 0, (int) (($w - $cw) / 2), (int) (($hh - $ch) / 2), imagesx($dst), imagesy($dst), $cw, $ch);
         imagejpeg($dst, $cacheFile, 88);
+    }
+}
+
+if (!is_file($cacheFile) && !$jpg && $c['image']) {
+    // Aperçu des liens partagés : la photo recadrée au même format 1200×630 que les instants texte,
+    // avec le titre sur un léger voile en bas.
+    $src = @imagecreatefromstring((string) file_get_contents(ROOT . '/uploads/' . $c['image']));
+    if ($src) {
+        $W = 1200;
+        $H = 630;
+        $w = imagesx($src);
+        $hh = imagesy($src);
+        $scale = max($W / $w, $H / $hh);
+        $cw = (int) round($W / $scale);
+        $ch = (int) round($H / $scale);
+        $img = imagecreatetruecolor($W, $H);
+        imagecopyresampled($img, $src, 0, 0, (int) (($w - $cw) / 2), (int) (($hh - $ch) / 2), $W, $H, $cw, $ch);
+        $font = ROOT . '/assets/fonts/Lora.ttf';
+        $label = trim((string) $c['title']) !== '' ? trim((string) $c['title']) : excerpt((string) $c['body'], 70);
+        $band = 150;
+        for ($y = 0; $y < $band; $y++) {
+            $a = (int) (127 - 85 * ($y / $band));           // dégradé transparent → voile sombre
+            imageline($img, 0, $H - $band + $y, $W, $H - $band + $y, imagecolorallocatealpha($img, 30, 26, 45, $a));
+        }
+        $white = imagecolorallocate($img, 255, 255, 255);
+        $soft = imagecolorallocatealpha($img, 255, 255, 255, 30);
+        if ($label !== '') {
+            $size = mb_strlen($label) > 45 ? 28 : 36;
+            $box = imagettfbbox($size, 0, $font, $label);
+            imagettftext($img, $size, 0, (int) (($W - ($box[2] - $box[0])) / 2), $H - 62, $white, $font, $label);
+        }
+        $brand = (string) cfg('site_name') . '  ·  ' . parse_url(base_url(), PHP_URL_HOST);
+        $box = imagettfbbox(17, 0, $font, $brand);
+        imagettftext($img, 17, 0, (int) (($W - ($box[2] - $box[0])) / 2), $H - 24, $soft, $font, $brand);
+        imagejpeg($img, $cacheFile, 88);
     }
 }
 
@@ -105,9 +143,9 @@ if (!is_file($cacheFile)) {
     $brand = (string) cfg('site_name') . '  ·  ' . parse_url(base_url(), PHP_URL_HOST);
     $box = imagettfbbox(20, 0, $font, $brand);
     imagettftext($img, 20, 0, (int) (($W - ($box[2] - $box[0])) / 2), $H - 40, $green, $font, $brand);
-    $jpg ? imagejpeg($img, $cacheFile, 90) : imagepng($img, $cacheFile, 6);
+    imagejpeg($img, $cacheFile, 90);
 }
 
-header('Content-Type: image/' . ($jpg ? 'jpeg' : 'png'));
+header('Content-Type: image/jpeg');
 header('Cache-Control: public, max-age=86400');
 readfile($cacheFile);
