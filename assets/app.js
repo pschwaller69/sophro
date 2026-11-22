@@ -26,6 +26,23 @@
   const hint = document.getElementById('ios-hint');
   if (hint && isIOS && !standalone) hint.hidden = false;
 
+  // --- Mesure d'audience anonyme : « combien de personnes ont vu l'instant » ---
+  // Un numéro au hasard propre à l'appareil, gardé sur le téléphone, jamais partagé avec un autre site.
+  const viewed = document.querySelector('main[data-view]');
+  if (viewed) {
+    let vid = '';
+    try {
+      vid = localStorage.getItem('sophro-vid') || '';
+      if (!vid) { vid = (crypto.randomUUID ? crypto.randomUUID() : String(Math.random()).slice(2) + Date.now()); localStorage.setItem('sophro-vid', vid); }
+    } catch (e) { /* navigation privée : non compté */ }
+    const src = new URLSearchParams(location.search).get('source');
+    const body = JSON.stringify({
+      p: Number(viewed.dataset.view), kind: viewed.dataset.viewKind, v: vid,
+      source: src === 'notification' ? 'notification' : (standalone || src === 'pwa' ? 'app' : 'web'),
+    });
+    if (vid) fetch('/api/hit.php', { method: 'POST', body, headers: { 'Content-Type': 'application/json' }, keepalive: true }).catch(() => {});
+  }
+
   // --- Pastille sur l'icône : on l'enlève dès que l'app est ouverte ---
   const clearBadge = () => {
     if ('clearAppBadge' in navigator) navigator.clearAppBadge().catch(() => {});

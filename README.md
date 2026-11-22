@@ -85,3 +85,8 @@ php -S localhost:8000 tools/router.php
 Chaque instant partagé (texte, image ou audio) a le même aperçu 1200×630 : `og.php?p=<numéro>`.
 Pour une image, la photo est recadrée à ce format avec le titre en bas ; pour un texte, une carte est générée.
 Facebook garde un aperçu en mémoire : après une modification, utiliser l'outil de débogage de partage de Facebook pour le rafraîchir.
+
+## Statistiques
+
+Page « Statistiques » dans l'admin : nombre de personnes différentes qui ont ouvert l'instant chaque jour (dont depuis l'appli installée ou la notification), liens partagés ouverts, abonnés aux notifications.
+Sans traceur externe ni cookie publicitaire : un numéro au hasard est gardé sur l'appareil (localStorage) et envoyé haché à `api/hit.php`. Les visites de l'admin connectée et les robots ne sont pas comptés ; les données de plus de 13 mois sont effacées.

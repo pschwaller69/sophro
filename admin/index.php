@@ -89,7 +89,8 @@ $order = match ($filter) {
     default  => 'c.id DESC',
 };
 $contents = db()->query("SELECT c.*, (SELECT COUNT(*) FROM daily WHERE content_id = c.id AND day <= '$today') AS shown,
-                                (SELECT MAX(day) FROM daily WHERE content_id = c.id AND day <= '$today') AS last_shown
+                                (SELECT MAX(day) FROM daily WHERE content_id = c.id AND day <= '$today') AS last_shown,
+                                (SELECT COUNT(DISTINCT visitor) FROM views WHERE content_id = c.id) AS viewers
                          FROM contents c $where ORDER BY $order")->fetchAll();
 $counts = db()->query("SELECT COUNT(*) total, SUM(mode='auto') auto, SUM(mode='date') date, SUM(mode='yearly') yearly, SUM(mode='weekday') weekday, SUM(active=0) draft FROM contents")->fetch();
 
@@ -109,7 +110,7 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
 ?>
 <header class="site-header">
   <a href="/admin/" class="brand"><img src="/assets/icon.svg" alt="" width="36" height="36"><span>Administration</span></a>
-  <nav><a href="/" target="_blank">Voir le site</a> · <a href="/admin/social.php">Réseaux &amp; notifications</a> · <a href="/admin/password.php">Mot de passe</a> · <a href="/admin/logout.php">Déconnexion</a></nav>
+  <nav><a href="/" target="_blank">Voir le site</a> · <a href="/admin/stats.php">Statistiques</a> · <a href="/admin/social.php">Réseaux &amp; notifications</a> · <a href="/admin/password.php">Mot de passe</a> · <a href="/admin/logout.php">Déconnexion</a></nav>
 </header>
 
 <main class="wrap wide">
@@ -123,6 +124,8 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
       <h2>L’instant d’aujourd’hui, <?= h(date_fr($today)) ?></h2>
       <?php if ($todayContent): ?>
         <?= render_content($todayContent) ?>
+        <?php $vt = db()->prepare("SELECT COUNT(DISTINCT visitor) FROM views WHERE day = ? AND content_id = ?"); $vt->execute([$today, $todayContent['id']]); $nt = (int) $vt->fetchColumn(); ?>
+        <p class="muted small">Vu aujourd’hui par <?= $nt ?> <?= $nt > 1 ? 'personnes' : 'personne' ?> · <a href="/admin/stats.php">Statistiques</a></p>
         <div class="actions">
           <?= share_button($todayContent) ?>
           <a class="btn btn-ghost" href="/admin/edit.php?id=<?= (int) $todayContent['id'] ?>">Modifier</a>
@@ -175,7 +178,7 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
               <a href="/admin/edit.php?id=<?= (int) $c['id'] ?>" class="info-title"><?= h(content_label($c)) ?></a>
               <span class="badge mode-<?= h($c['mode']) ?>"><?= h(mode_label($c)) ?></span>
               <?php if (!$c['active']): ?><span class="badge draft">Brouillon</span><?php endif ?>
-              <span class="muted small"><?= $c['shown'] ? 'Montré ' . (int) $c['shown'] . ' fois, dernière fois le ' . h(date_fr((string) $c['last_shown'], false, true)) : 'Jamais montré' ?></span>
+              <span class="muted small"><?= $c['shown'] ? 'Montré ' . (int) $c['shown'] . ' fois, dernière fois le ' . h(date_fr((string) $c['last_shown'], false, true)) . ($c['viewers'] ? ' · vu par ' . (int) $c['viewers'] . ((int) $c['viewers'] > 1 ? ' personnes' : ' personne') : '') : 'Jamais montré' ?></span>
             </div>
             <div class="row-actions">
               <?php if (is_public($c)): ?><?= share_button($c, '', 'icon-btn') ?><?php endif ?>

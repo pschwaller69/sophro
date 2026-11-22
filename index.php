@@ -51,7 +51,7 @@ page_head($meta, 'public');
   <button type="button" class="btn btn-ghost" id="install-btn" hidden>Installer l'app</button>
 </header>
 
-<main class="wrap">
+<main class="wrap"<?php if ($c): ?> data-view="<?= (int) $c['id'] ?>" data-view-kind="<?= $isPermalink ? 'link' : 'today' ?>"<?php endif ?>>
   <p class="today-label">
     <?= $isPermalink ? 'Un instant partagé avec vous' : 'L’instant du jour · ' . h(date_fr($today)) ?>
   </p>

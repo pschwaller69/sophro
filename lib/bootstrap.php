@@ -102,6 +102,15 @@ function migrate(PDO $pdo): void
             created_at TEXT NOT NULL DEFAULT (datetime('now')),
             last_ok    TEXT
         );
+        CREATE TABLE IF NOT EXISTS views (
+            day        TEXT NOT NULL,                    -- AAAA-MM-JJ
+            content_id INTEGER NOT NULL,
+            visitor    TEXT NOT NULL,                    -- identifiant anonyme de l'appareil (haché)
+            kind       TEXT NOT NULL DEFAULT 'today',    -- today (instant du jour) | link (lien partagé)
+            source     TEXT NOT NULL DEFAULT 'web',      -- web | app | notification
+            PRIMARY KEY (day, content_id, visitor)
+        );
+        CREATE INDEX IF NOT EXISTS views_content ON views(content_id);
         CREATE TABLE IF NOT EXISTS settings (
             key   TEXT PRIMARY KEY,
             value TEXT NOT NULL

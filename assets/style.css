@@ -212,3 +212,17 @@ body.public .recent a:hover { background: color-mix(in srgb, var(--card) 80%, tr
 .rec-time.live::before { content: "● "; animation: blink 1s infinite; }
 @keyframes blink { 50% { opacity: .2; } }
 .rec-result audio { width: 100%; margin-top: 10px; }
+
+/* Statistiques */
+.stat-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 16px 0 24px; }
+.stat-tile { background: var(--card); border-radius: 16px; box-shadow: var(--shadow); padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; }
+.stat-tile strong { font: 600 1.9rem Lora, Georgia, serif; color: var(--violet-dark); }
+.stat-tile span { font-size: .85rem; color: var(--muted); }
+.stat-days { list-style: none; padding: 0; margin: 0 0 24px; background: var(--card); border-radius: 16px; box-shadow: var(--shadow); }
+.stat-days li { padding: 10px 16px; border-bottom: 1px solid var(--line); }
+.stat-days li:last-child { border-bottom: 0; }
+.sd-head { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; }
+.sd-n { white-space: nowrap; }
+.sd-bar { height: 6px; border-radius: 99px; background: var(--bg2); margin: 6px 0 4px; overflow: hidden; }
+.sd-bar span { display: block; height: 100%; background: var(--violet); border-radius: 99px; }
+.sd-detail a { color: inherit; }
