@@ -129,6 +129,12 @@ img { max-width: 100%; }
 .mode-opts[hidden] { display: none; }
 .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .presets button { border: 0; border-radius: 99px; padding: 6px 12px; background: var(--violet-soft); color: var(--violet-dark); font: inherit; font-size: .85rem; cursor: pointer; }
+.weekdays { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+.form .day-chip { position: relative; cursor: pointer; display: inline-block; margin: 0; }
+.day-chip input { position: absolute; opacity: 0; pointer-events: none; }
+.day-chip span { display: inline-block; padding: 6px 12px; border-radius: 99px; background: var(--card); border: 1px solid var(--line); font-size: .88rem; }
+.day-chip input:checked + span { background: var(--violet); border-color: var(--violet); color: #fff; }
+.day-chip input:focus-visible + span { outline: 2px solid var(--violet-dark); outline-offset: 2px; }
 .delete-form { text-align: center; margin-top: 30px; }
 
 .list-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
@@ -145,10 +151,12 @@ img { max-width: 100%; }
 .badge { font-size: .75rem; padding: 2px 10px; border-radius: 99px; background: var(--bg2); color: var(--green-dark); }
 .badge.mode-date { background: #f2e6d3; color: #7a5a2a; }
 .badge.mode-yearly { background: #e4e2f3; color: #4c4680; }
+.badge.mode-weekday { background: #dcecf1; color: #2f5d6b; }
 .badge.draft { background: #eee; color: #666; }
 @media (prefers-color-scheme: dark) {
   .badge.mode-date { background: #4a3f2e; color: #f2dcb6; }
   .badge.mode-yearly { background: #393653; color: #d9d5ff; }
+  .badge.mode-weekday { background: #2a4048; color: #cfe6ee; }
   .alert.ok { background: #2c4434; color: #cfe8d6; }
   .alert.error { background: #4d2b27; color: #f6d3ce; }
 }
@@ -156,7 +164,7 @@ img { max-width: 100%; }
 .upcoming li { display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 9px 16px; border-bottom: 1px solid var(--line); font-size: .92rem; }
 .upcoming li:last-child { border-bottom: 0; }
 .up-day { width: 11em; color: var(--muted); }
-.up-date .up-day, .up-yearly .up-day { color: var(--ink); font-weight: 600; }
+.up-date .up-day, .up-yearly .up-day, .up-weekday .up-day { color: var(--ink); font-weight: 600; }
 .site-header .btn { padding: 8px 14px; font-size: .88rem; white-space: nowrap; }
 .brand span { white-space: nowrap; }
 .up-day { white-space: nowrap; }

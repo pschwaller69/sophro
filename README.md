@@ -10,7 +10,8 @@ Hébergée sur **https://sophro.schwaller.fr** (o2switch), déployée automatiqu
 - **Choix du contenu du jour** (dans l'ordre) :
   1. un contenu programmé **à cette date précise** ;
   2. un contenu **de saison** (« chaque année du … au … », ex. Noël, printemps) : ceux pas encore vus cette saison passent en priorité, ensuite ils sont mélangés aux autres ;
-  3. sinon un **tirage au hasard** parmi les contenus « au hasard » et les anciens contenus datés, en favorisant ceux qui n'ont pas été montrés depuis longtemps.
+  3. un instant réservé à **ce jour de la semaine** (« chaque lundi », « lundi et vendredi ») : s'il y en a plusieurs, ils passent chacun leur tour ;
+  4. sinon un **tirage au hasard** parmi les contenus « au hasard » et les anciens contenus datés, en favorisant ceux qui n'ont pas été montrés depuis longtemps.
   Les contenus de saison ne sortent jamais en dehors de leur période. Le choix est mémorisé : tout le monde voit le même contenu dans la journée (heure de Paris).
 - **Partage** : sur téléphone, le menu de partage natif (WhatsApp, Instagram, Messenger, SMS… avec l'image quand il y en a une) ; sur ordinateur, un menu Facebook / WhatsApp / X / LinkedIn / e-mail / copier le lien.
   Chaque contenu a son lien `/p/<numéro>` avec un aperçu (titre, texte, image) sur les réseaux sociaux ; pour un texte seul, une image est générée automatiquement.
@@ -18,7 +19,7 @@ Hébergée sur **https://sophro.schwaller.fr** (o2switch), déployée automatiqu
 ## Import de contenus (CSV)
 
 Admin → *Importer* : un fichier CSV avec les colonnes `titre ; texte ; quand ; date ; debut ; fin`
-(`quand` = `hasard` ; `date` avec `date` en JJ/MM/AAAA pour une seule fois ; `chaque année` avec `date` en JJ/MM pour un jour fixe répété tous les ans, ou `debut`/`fin` en JJ/MM pour une période).
+(`quand` = `hasard` ; `date` avec `date` en JJ/MM/AAAA pour une seule fois ; `chaque année` avec `date` en JJ/MM pour un jour fixe répété tous les ans, ou `debut`/`fin` en JJ/MM pour une période ; un jour de la semaine, ex. `lundi` ou `lundi et vendredi`, ou `semaine` avec une colonne `jours`).
 Les doublons (même titre et même texte) sont ignorés : réimporter le même fichier est sans risque.
 Pour une période annuelle, les contenus d'un seul jour (ex. 25/12) passent avant ceux d'une période plus longue.
 

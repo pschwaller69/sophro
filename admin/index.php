@@ -78,18 +78,20 @@ $where = match ($filter) {
     'auto'   => "WHERE mode = 'auto'",
     'date'   => "WHERE mode = 'date'",
     'yearly' => "WHERE mode = 'yearly'",
+    'weekday' => "WHERE mode = 'weekday'",
     'draft'  => 'WHERE active = 0',
     default  => '',
 };
 $order = match ($filter) {
     'date'   => 'c.publish_date ASC, c.id',
     'yearly' => 'c.yearly_start ASC, c.yearly_end ASC, c.id',
+    'weekday' => 'c.weekdays ASC, c.id',
     default  => 'c.id DESC',
 };
 $contents = db()->query("SELECT c.*, (SELECT COUNT(*) FROM daily WHERE content_id = c.id AND day <= '$today') AS shown,
                                 (SELECT MAX(day) FROM daily WHERE content_id = c.id AND day <= '$today') AS last_shown
                          FROM contents c $where ORDER BY $order")->fetchAll();
-$counts = db()->query("SELECT COUNT(*) total, SUM(mode='auto') auto, SUM(mode='date') date, SUM(mode='yearly') yearly, SUM(active=0) draft FROM contents")->fetch();
+$counts = db()->query("SELECT COUNT(*) total, SUM(mode='auto') auto, SUM(mode='date') date, SUM(mode='yearly') yearly, SUM(mode='weekday') weekday, SUM(active=0) draft FROM contents")->fetch();
 
 function mode_label(array $c): string
 {
@@ -98,6 +100,7 @@ function mode_label(array $c): string
         'yearly' => $c['yearly_start'] === $c['yearly_end']
             ? 'Chaque année le ' . md_fr((string) $c['yearly_start'])
             : 'Chaque année du ' . md_fr((string) $c['yearly_start']) . ' au ' . md_fr((string) $c['yearly_end']),
+        'weekday' => 'Chaque ' . weekdays_fr(weekdays_of($c)),
         default  => 'Au hasard',
     };
 }
@@ -138,7 +141,7 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
             <?php else: ?>
               <div class="up-content">
                 <a href="/admin/edit.php?id=<?= (int) $uc['id'] ?>" class="up-title"><?= h(content_label($uc)) ?></a>
-                <?php if ($uc['mode'] !== 'auto'): ?><span class="badge mode-<?= h($uc['mode']) ?>"><?= $uc['mode'] === 'date' ? 'Date précise' : 'Chaque année' ?></span><?php endif ?>
+                <?php if ($uc['mode'] !== 'auto'): ?><span class="badge mode-<?= h($uc['mode']) ?>"><?= h(match ($uc['mode']) { 'date' => 'Date précise', 'weekday' => 'Chaque ' . weekdays_fr(weekdays_of($uc)), default => 'Chaque année' }) ?></span><?php endif ?>
                 <?php if ($uc['image']): ?><span class="badge">image</span><?php endif ?>
                 <?php if ($uc['audio']): ?><span class="badge">audio</span><?php endif ?>
                 <?php if (trim((string) $uc['body']) !== '' && trim((string) $uc['title']) !== ''): ?>
@@ -157,7 +160,7 @@ page_head(['title' => 'Administration', 'noindex' => true], 'admin');
         <span><a class="btn btn-ghost" href="/admin/import.php">Importer</a> <a class="btn" href="/admin/edit.php">+ Nouvel instant</a></span>
       </div>
       <nav class="filters">
-        <?php foreach (['all' => 'Tous', 'auto' => 'Au hasard', 'date' => 'Date précise', 'yearly' => 'Chaque année', 'draft' => 'Brouillons'] as $k => $lbl): ?>
+        <?php foreach (['all' => 'Tous', 'auto' => 'Au hasard', 'date' => 'Date précise', 'yearly' => 'Chaque année', 'weekday' => 'Jour de la semaine', 'draft' => 'Brouillons'] as $k => $lbl): ?>
           <a href="?f=<?= $k ?>" class="<?= $filter === $k ? 'on' : '' ?>"><?= $lbl ?><?php if ($k !== 'all'): ?> <small><?= (int) $counts[$k] ?></small><?php endif ?></a>
         <?php endforeach ?>
       </nav>

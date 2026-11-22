@@ -83,7 +83,7 @@ function migrate(PDO $pdo): void
             body          TEXT NOT NULL DEFAULT '',
             image         TEXT,
             audio         TEXT,
-            mode          TEXT NOT NULL DEFAULT 'auto',  -- auto | date | yearly
+            mode          TEXT NOT NULL DEFAULT 'auto',  -- auto | date | yearly | weekday
             publish_date  TEXT,                          -- AAAA-MM-JJ (mode date)
             yearly_start  TEXT,                          -- MM-JJ (mode yearly)
             yearly_end    TEXT,                          -- MM-JJ (mode yearly)
@@ -107,6 +107,25 @@ function migrate(PDO $pdo): void
             value TEXT NOT NULL
         );
     ");
+    // Colonnes ajoutées après la première version
+    $cols = array_column($pdo->query('PRAGMA table_info(contents)')->fetchAll(PDO::FETCH_ASSOC), 'name');
+    if (!in_array('weekdays', $cols, true)) {
+        $pdo->exec('ALTER TABLE contents ADD COLUMN weekdays TEXT'); // ex. ",1,5," = lundi et vendredi (mode weekday)
+    }
+}
+
+/** Jours de la semaine d'un instant (1 = lundi … 7 = dimanche). */
+function weekdays_of(array $c): array
+{
+    return array_values(array_filter(array_map('intval', explode(',', (string) ($c['weekdays'] ?? ''))), fn($n) => $n >= 1 && $n <= 7));
+}
+
+/** « lundi et vendredi », « lundi, mercredi et vendredi » */
+function weekdays_fr(array $days): string
+{
+    $names = array_map(fn($n) => JOURS[$n % 7], $days);
+    $last = array_pop($names);
+    return $names ? implode(', ', $names) . ' et ' . $last : (string) $last;
 }
 
 function setting(string $key): ?string

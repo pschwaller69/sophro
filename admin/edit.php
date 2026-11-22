@@ -17,7 +17,7 @@ if ($id && !$c) {
 }
 $c = $c ?? [
     'id' => 0, 'title' => '', 'body' => '', 'image' => null, 'audio' => null,
-    'mode' => 'auto', 'publish_date' => null, 'yearly_start' => '12-20', 'yearly_end' => '12-31', 'active' => 1,
+    'mode' => 'auto', 'publish_date' => null, 'yearly_start' => '12-20', 'yearly_end' => '12-31', 'weekdays' => null, 'active' => 1,
 ];
 $error = null;
 
@@ -36,9 +36,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $new = [
         'title'  => trim((string) ($_POST['title'] ?? '')),
         'body'   => trim((string) ($_POST['body'] ?? '')),
-        'mode'   => in_array($_POST['mode'] ?? '', ['auto', 'date', 'yearly'], true) ? $_POST['mode'] : 'auto',
+        'mode'   => in_array($_POST['mode'] ?? '', ['auto', 'date', 'yearly', 'weekday'], true) ? $_POST['mode'] : 'auto',
         'active' => isset($_POST['active']) ? 1 : 0,
-        'publish_date' => null, 'yearly_start' => null, 'yearly_end' => null,
+        'publish_date' => null, 'yearly_start' => null, 'yearly_end' => null, 'weekdays' => null,
         'image' => $c['image'], 'audio' => $c['audio'],
     ];
     $md = fn(string $p) => sprintf('%02d-%02d', (int) ($_POST[$p . '_m'] ?? 1), (int) ($_POST[$p . '_d'] ?? 1));
@@ -59,6 +59,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($new['mode'] === 'yearly') {
             $new['yearly_start'] = $md('ys');
             $new['yearly_end'] = $md('ye');
+        } elseif ($new['mode'] === 'weekday') {
+            $days = array_values(array_unique(array_filter(array_map('intval', (array) ($_POST['weekdays'] ?? [])), fn($n) => $n >= 1 && $n <= 7)));
+            sort($days);
+            if (!$days) {
+                throw new RuntimeException('Cochez au moins un jour de la semaine.');
+            }
+            $new['weekdays'] = ',' . implode(',', $days) . ',';
         }
 
         $uploadedImage = handle_upload('image', 'image');
@@ -75,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             throw new RuntimeException('L’instant est vide : ajoutez au moins un texte, une image ou un audio.');
         }
 
-        $cols = ['title', 'body', 'image', 'audio', 'mode', 'publish_date', 'yearly_start', 'yearly_end', 'active'];
+        $cols = ['title', 'body', 'image', 'audio', 'mode', 'publish_date', 'yearly_start', 'yearly_end', 'weekdays', 'active'];
         $vals = array_map(fn($k) => $new[$k], $cols);
         if ($c['id']) {
             $set = implode(', ', array_map(fn($k) => "$k = ?", $cols));
@@ -198,6 +205,16 @@ page_head(['title' => $c['id'] ? 'Modifier l’instant' : 'Nouvel instant', 'noi
         </div>
         <div class="md-range">Du <?= md_select('ys', $c['yearly_start']) ?> au <?= md_select('ye', $c['yearly_end']) ?></div>
         <p class="muted small">Pour un seul jour par an, mettez la même date au début et à la fin.</p>
+      </div>
+      <label class="radio"><input type="radio" name="mode" value="weekday" <?= $c['mode'] === 'weekday' ? 'checked' : '' ?>>
+        <span><strong>Certains jours de la semaine</strong><br><small>Par exemple un instant du lundi ou du vendredi. Jamais tiré au hasard les autres jours.</small></span></label>
+      <div class="mode-opts" data-for="weekday">
+        <div class="weekdays">
+          <?php $wd = weekdays_of($c); foreach ([1, 2, 3, 4, 5, 6, 7] as $n): ?>
+            <label class="day-chip"><input type="checkbox" name="weekdays[]" value="<?= $n ?>" <?= in_array($n, $wd, true) ? 'checked' : '' ?>><span><?= h(ucfirst(JOURS[$n % 7])) ?></span></label>
+          <?php endforeach ?>
+        </div>
+        <p class="muted small">S’il y a plusieurs instants pour le même jour, ils passent chacun leur tour. Une date précise ou une fête annuelle reste prioritaire.</p>
       </div>
     </fieldset>
 

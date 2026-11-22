@@ -5,7 +5,8 @@ declare(strict_types=1);
  * Choix du contenu du jour, par ordre de priorité :
  *  1. un contenu programmé à cette date précise ;
  *  2. un contenu « chaque année » dont la période couvre ce jour (Noël, printemps…) ;
- *  3. sinon, un tirage au hasard parmi les contenus libres et les anciens contenus datés,
+ *  3. un contenu réservé à ce jour de la semaine (instants du lundi, du vendredi…) ;
+ *  4. sinon, un tirage au hasard parmi les contenus libres et les anciens contenus datés,
  *     en privilégiant ceux qui n'ont pas été montrés depuis longtemps.
  * Le choix est mémorisé (table daily) pour que tout le monde voie le même contenu toute la journée.
  */
@@ -62,10 +63,44 @@ function pick_for_day(string $day): ?array
             $min = min(array_map('period_length', $fresh));
             return pick_fair(array_values(array_filter($fresh, fn($r) => period_length($r) === $min)));
         }
+    }
+    // Instants réservés à ce jour de la semaine (ex. « chaque lundi »)
+    if ($week = weekday_for_day($day)) {
+        return pick_fair($week);
+    }
+    if ($kind === 'yearly') {
         // Tous déjà vus cette saison : on les mélange avec les autres contenus.
         return pick_fair(array_merge($rows, pool_for_day($day)));
     }
     return pick_fair(pool_for_day($day));
+}
+
+/** Instants qui doivent passer ce jour-là (avant tout tirage au hasard parmi les autres). */
+function imposed_for_day(string $day): array
+{
+    [$kind, $rows] = forced_for_day($day);
+    if ($kind === 'date') {
+        return $rows;
+    }
+    if ($kind === 'yearly' && ($fresh = array_filter($rows, fn($r) => (string) $r['last_shown'] < period_start($r, $day)))) {
+        return array_values($fresh);
+    }
+    return weekday_for_day($day);
+}
+
+/** Instants « certains jours de la semaine » qui tombent ce jour-là. */
+function weekday_for_day(string $day): array
+{
+    $t = strtotime($day . ' 12:00:00');
+    $n = (int) date('N', $t);
+    // « Dernière fois » comptée sur ce même jour de la semaine : un instant « lundi et vendredi »
+    // passe aussi son tour le lundi, même s'il vient d'être montré le vendredi.
+    $st = db()->prepare("
+        SELECT c.*, (SELECT MAX(day) FROM daily WHERE content_id = c.id AND day < :day AND strftime('%w', day) = :w) AS last_shown
+        FROM contents c
+        WHERE c.active = 1 AND c.mode = 'weekday' AND c.weekdays LIKE :n");
+    $st->execute([':day' => $day, ':w' => date('w', $t), ':n' => '%,' . $n . ',%']);
+    return $st->fetchAll();
 }
 
 /** Durée de la période annuelle, en jours. */
@@ -117,9 +152,10 @@ function reset_today_if_needed(?array $c): void
     $st = db()->prepare('SELECT content_id FROM daily WHERE day = ?');
     $st->execute([$today]);
     $current = $st->fetchColumn();
-    [$kind, $rows] = forced_for_day($today);
-    $forcedIds = array_map(fn($r) => (int) $r['id'], $rows);
-    $stale = ($c && $current !== false && (int) $current === (int) $c['id'] && !is_public($c))
+    $forcedIds = array_map(fn($r) => (int) $r['id'], imposed_for_day($today));
+    $isCurrent = $c && $current !== false && (int) $current === (int) $c['id'];
+    $stale = ($isCurrent && !is_public($c))
+        || ($isCurrent && $c['mode'] === 'weekday' && !in_array((int) date('N'), weekdays_of($c), true))
         || ($forcedIds && $current !== false && !in_array((int) $current, $forcedIds, true));
     if ($stale) {
         db()->prepare('DELETE FROM daily WHERE day = ?')->execute([$today]);

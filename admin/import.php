@@ -4,7 +4,8 @@ declare(strict_types=1);
 /*
  * Import de contenus depuis un fichier CSV (Excel, LibreOffice, Google Sheets…).
  * Colonnes reconnues (1re ligne) : titre ; texte ; quand ; date ; debut ; fin
- *   quand = hasard (par défaut), date (avec la colonne date : JJ/MM/AAAA) ou saison (avec debut et fin : JJ/MM)
+ *   quand = hasard (par défaut), date (avec la colonne date : JJ/MM/AAAA), saison (avec debut et fin : JJ/MM)
+ *           ou un ou plusieurs jours de la semaine (« lundi », « chaque vendredi », ou « semaine » + colonne jours)
  * Les contenus déjà présents (même titre et même texte) sont ignorés.
  */
 
@@ -18,6 +19,19 @@ require_admin();
 function norm(string $s): string
 {
     return mb_strtolower(trim(preg_replace('/\s+/u', ' ', $s)));
+}
+
+/** « lundi et vendredi » → ",1,5," (null si aucun jour reconnu). */
+function parse_weekdays(string $s): ?string
+{
+    $s = norm($s);
+    $days = [];
+    foreach ([1 => 'lun', 2 => 'mar', 3 => 'mer', 4 => 'jeu', 5 => 'ven', 6 => 'sam', 7 => 'dim'] as $n => $abbr) {
+        if (preg_match('/\b' . $abbr . '/u', $s)) {
+            $days[] = $n;
+        }
+    }
+    return $days ? ',' . implode(',', $days) . ',' : null;
 }
 
 function find_col(array $header, array $names): ?int
@@ -83,6 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $cDate = find_col($header, ['date', 'jour']);
         $cStart = find_col($header, ['debut', 'début']);
         $cEnd = find_col($header, ['fin']);
+        $cDays = find_col($header, ['jours', 'jours de la semaine', 'jour de la semaine']);
         if ($cTitle === null && $cText === null) {
             throw new RuntimeException('La première ligne doit contenir les noms de colonnes, au moins « titre » ou « texte ».');
         }
@@ -93,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
 
         $active = isset($_POST['draft']) ? 0 : 1;
-        $ins = db()->prepare('INSERT INTO contents (title, body, mode, publish_date, yearly_start, yearly_end, active) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        $ins = db()->prepare('INSERT INTO contents (title, body, mode, publish_date, yearly_start, yearly_end, weekdays, active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
         $added = $dupes = $empty = 0;
         $errors = [];
         $line = 1;
@@ -113,7 +128,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 continue;
             }
             $mode = norm($get($cMode));
-            $date = $start = $end = null;
+            $date = $start = $end = $days = null;
             if (in_array($mode, ['date', 'date précise'], true)) {
                 $mode = 'date';
                 $date = parse_date($get($cDate));
@@ -136,10 +151,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $errors[] = "Ligne $line : période invalide (attendu debut et fin au format JJ/MM).";
                     continue;
                 }
+            } elseif (($days = parse_weekdays($mode)) || in_array($mode, ['semaine', 'chaque semaine', 'jour de la semaine', 'jours de la semaine', 'hebdo', 'hebdomadaire', 'weekday'], true)) {
+                $mode = 'weekday';
+                $days = $days ?? parse_weekdays($get($cDays)) ?? parse_weekdays($get($cDate));
+                if (!$days) {
+                    $errors[] = "Ligne $line : jour de la semaine manquant (ex. « lundi » ou « lundi, vendredi »).";
+                    continue;
+                }
             } else {
                 $mode = 'auto';
             }
-            $ins->execute([$title, $text, $mode, $date, $start, $end, $active]);
+            $ins->execute([$title, $text, $mode, $date, $start, $end, $days, $active]);
             $existing[$key] = true;
             $added++;
         }
@@ -190,9 +212,10 @@ page_head(['title' => 'Importer des instants', 'noindex' => true], 'admin');
     <p>Un tableau enregistré au format CSV (Excel, LibreOffice ou Google Sheets), avec ces colonnes sur la première ligne :</p>
     <ul>
       <li><strong>titre</strong> et <strong>texte</strong> : au moins l'un des deux ;</li>
-      <li><strong>quand</strong> : <em>hasard</em> (par défaut), <em>date</em> (une seule fois) ou <em>chaque année</em> (aussi accepté : <em>saison</em>) ;</li>
+      <li><strong>quand</strong> : <em>hasard</em> (par défaut), <em>date</em> (une seule fois) <em>chaque année</em> (aussi accepté : <em>saison</em>) ou un jour de la semaine (<em>lundi</em>, <em>lundi et vendredi</em>…) ;</li>
       <li><strong>date</strong> : pour <em>date</em>, au format JJ/MM/AAAA ; pour <em>chaque année</em> sur un seul jour, JJ/MM (ex. 25/12) ;</li>
-      <li><strong>debut</strong> et <strong>fin</strong> : pour <em>chaque année</em> sur une période, au format JJ/MM (ex. 18/12 et 26/12).</li>
+      <li><strong>debut</strong> et <strong>fin</strong> : pour <em>chaque année</em> sur une période, au format JJ/MM (ex. 18/12 et 26/12) ;</li>
+      <li><strong>jours</strong> (facultatif) : avec <em>quand</em> = <em>semaine</em>, les jours concernés (ex. « lundi, vendredi »).</li>
     </ul>
     <p class="muted">Un instant qui existe déjà (même titre et même texte) n'est pas importé une deuxième fois : vous pouvez réimporter le même fichier sans risque.</p>
   </div></section>
