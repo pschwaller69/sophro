@@ -36,7 +36,7 @@ function page_head(array $meta = [], string $bodyClass = ''): void
 <link rel="apple-touch-icon" href="/assets/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="<?= h($site) ?>">
-<link rel="stylesheet" href="/assets/style.css?v=<?= $v ?>">
+<style><?= inline_css() ?></style>
 <script src="/assets/app.js?v=<?= $v ?>" defer></script>
 </head>
 <body class="<?= h($bodyClass) ?> season-<?= h(current_season()) ?>">
@@ -92,6 +92,17 @@ function page_foot(): void
 </body>
 </html>
 <?php
+}
+
+/**
+ * Feuille de style écrite directement dans la page : elle s'affiche correctement même dans les navigateurs
+ * intégrés (Facebook, Messenger, Instagram) qui chargent parfois mal les fichiers CSS séparés.
+ */
+function inline_css(): string
+{
+    $css = (string) @file_get_contents(ROOT . '/assets/style.css');
+    $css = preg_replace('#url\("(?!/|https?:|data:)#', 'url("/assets/', $css);
+    return str_replace('</', '<\/', $css);
 }
 
 function asset_version(): string
